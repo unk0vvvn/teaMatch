@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="my-3 text-center">
+    <h4 class="text-center py-3 text-decoration-underline">SignUp</h4>
+    {% include "flashmessage.html" %}
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-6">
+            <form action="{{ url_for('signup') }}" method="POST">
+                <!-- Email input -->
+                <div class="form-outline mb-4">
+                    <input type="email" name="email" id="form3Example3" class="form-control" required/>
+                    <label class="form-label" for="form3Example3">Email address</label>
+                </div>
+
+                <!-- Password input -->
+                <div class="form-outline mb-4">
+                    <input type="password" name="password" id="form3Example4" class="form-control" required/>
+                    <label class="form-label" for="form3Example4">Password</label>
+                </div>
+
+                <!-- Password confirm -->
+                <div class="form-outline mb-4">
+                    <input type="password" name="password_confirm" id="form3Example4" class="form-control" required/>
+                    <label class="form-label" for="form3Example4">Password Confirm</label>
+                </div>
+
+                <!-- Submit button -->
+                <button type="submit" class="btn btn-primary btn-block mb-4">
+                    SignUp
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
