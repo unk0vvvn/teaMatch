@@ -6,6 +6,12 @@
     <div class="row d-flex justify-content-center">
         <div class="col-md-6">
             <form action="{{ url_for('signup') }}" method="POST">
+                <!-- Nickname input -->
+                <div class="form-outline mb-4">
+                    <input type="text" name="nickname" id="form3Example3" class="form-control" required/>
+                    <label class="form-label" for="form3Example3">Nickname</label>
+                </div>
+
                 <!-- Email input -->
                 <div class="form-outline mb-4">
                     <input type="email" name="email" id="form3Example3" class="form-control" required/>
