@@ -1,2 +1,2 @@
 # 23.05-WebProgramming
-virtual tour in seoul
+Team matching in sejong univ.
