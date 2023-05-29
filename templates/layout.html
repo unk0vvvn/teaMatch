@@ -54,7 +54,7 @@
 
                     <!-- right menu -->
                     <ul class="navbar-nav d-flex flex-row">
-                        {% if session['_id'] %}
+                        {% if session['_id'] is defined %}
                         <li class="nav-item me-3 me-lg-0">
                             <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                         </li>
@@ -97,6 +97,16 @@
 
     <!-- MDB -->
     <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
+
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+    <!-- javascript 시작-->
+    {% block script %}
+    {% endblock %}
+    <!-- javascript 끝-->
 </body>
+
+
 
 </html>

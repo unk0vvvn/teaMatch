@@ -30,7 +30,7 @@
         <tbody>
             {% for post in posts %}
             <tr class="text-center">
-                <td>{{post_count - (page - 1) * loop.length - (loop.index-1)}}</td> 
+                <td>{{post_count - page * page_size - (loop.index-1)}}</td> 
 
                 <td class="text-start">
                     <a href = "{{ url_for('post_detail', id=post._id) }}">{{post.title}}</a>
@@ -44,34 +44,37 @@
                  
                 <td>{{post.create_date}}</td>
                 
-                <td>0</td>
+                <td>{{post.view_count}}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
     <!-- 페이징 처리 시작 -->
-	{# <div>
+    {% set page_count = (post_count/page_size) | round(0,"ceil") | int %}
+	<div>
 		<ul class="pagination justify-content-center">
 			<li class="page-item">
 				<a class="page-link" href="{{url_for('post_list')}}"> 
 				처음
 				</a>
 			</li>
-			<li th:each="page: ${numbers.sequence(0, paging.totalPages-1)}"
-				th:classappend="${page == paging.number} ? 'active'" 
-				th:if="${page >= paging.number-5 && page <= paging.number+5 && page < paging.totalPages}"
-				class="page-item">
-				<a class="page-link" th:text="${page}" th:href="@{/question/list(page=${page}, kw=${kw})}"></a>
-			</li>
-			
+            {% for page_num in range(page_count) %}
+            {% if page_num >= page-5 and page_num <= page+5 %}
+                <li 
+                class="page-item">
+                    <a class="page-link {{'active' if page_num == page}}" href="{{url_for('post_list', page = page_num)}}">{{page_num}}</a>
+                </li>
+            {% endif %}
+            {% endfor %}
+
 			<li class="page-item">
-				<a class="page-link" href="{{url_for('post_list', page=post_count/(posts|count))}}"> 
+				<a class="page-link" href="{{url_for('post_list', page=page_count - 1)}}"> 
 					마지막
 				</a>
 			</li>
 		</ul>
-	</div> #}
+	</div>
 	<!-- 페이징 처리 끝 -->
 </section>
 {% endblock %}

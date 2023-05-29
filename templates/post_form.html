@@ -5,7 +5,12 @@
     {% include "flashmessage.html" %}
     <div class="row d-flex justify-content-center">
         <div class="col-md-6">
+            
+            {% if post is defined %}
             <form action="{{ url_for('post_write') }}" method="POST">
+            {% else %}
+            <form action="{{ url_for('post_modify', id=post._id) }}" method="POST">
+            {% endif %}
                 <!-- Title input -->
                 <div class="form-outline mb-4">
                     <input type="text" name="title" id="form3Example3" class="form-control" 

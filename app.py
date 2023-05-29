@@ -10,12 +10,13 @@ client = pymongo.MongoClient("mongodb://localhost:27017/")
 db = client["virtual_tour"] 
 user_collection = db['user'] 
 post_collection = db['post'] 
+post_comment_collection = db['post_comment']
 
 app = Flask(__name__)
 
 app.secret_key = 'fad62b7c1a6a9e67dbb66c3571a23ff2425650965f80047ea2fadce543b088cf'
 
-POST_PAGE_SIZE = 10
+PAGE_SIZE = 10
 
 def login_required(view):
     @functools.wraps(view)
@@ -36,13 +37,13 @@ def home():
 
 @app.route('/community')
 def post_list():
-    page = request.args.get('page', default = 1, type = int)
-    page_offset = (page - 1) * POST_PAGE_SIZE
+    page = request.args.get('page', default = 0, type = int)
+    page_offset = page * PAGE_SIZE
     
     post_count = post_collection.count_documents({})
-    posts = post_collection.find().sort("create_date", pymongo.DESCENDING).skip(page_offset).limit(POST_PAGE_SIZE)
+    posts = post_collection.find().sort("create_date", pymongo.DESCENDING).skip(page_offset).limit(PAGE_SIZE)
 
-    return render_template("post_list.html", posts = posts, page = page, post_count = post_count)
+    return render_template("post_list.html", posts = posts, page = page, post_count = post_count, page_size = PAGE_SIZE)
 
 
 @app.route('/community/post/write', methods=['GET', 'POST'])
@@ -60,7 +61,8 @@ def post_write():
         'content' : content,
         'create_date' : datetime.now(),
         'author' : session['nickname'],
-        'author_id' : session['_id']
+        'author_id' : session['_id'],
+        'view_count' : 0
     }
 
     result = post_collection.insert_one(post_data)
@@ -69,9 +71,26 @@ def post_write():
 
 @app.route('/community/post/<id>')
 def post_detail(id):
+    increase_view_count(id)
+
     post = post_collection.find_one({"_id" : ObjectId(id)})
+    comments = list(get_comments(id))
     
-    return render_template("post_detail.html", post = post)
+    return render_template("post_detail.html", post = post, comments = comments)
+
+def increase_view_count(id):
+    filter = {"_id" : ObjectId(id)}
+
+    post = post_collection.find_one(filter)
+
+    data ={
+    "$set" : {
+        "view_count" : post["view_count"]+1,
+        }
+    }
+
+    post_collection.update_one(filter, data)
+    
 
 @app.route('/community/post/modify/<id>', methods=['GET', 'POST'])
 @login_required
@@ -89,7 +108,8 @@ def post_modify(id):
     data ={
     "$set" : {
         'title' : title,
-        'content' : content
+        'content' : content,
+        'modify_date' : datetime.now()
         }
     }
 
@@ -106,7 +126,41 @@ def post_delete(id):
 
     return redirect(url_for('post_list'))
 
+# 댓글 시작
+
+@app.route('/community/post/<id>/comment/write', methods = ["POST"])
+def comment_write(id):
+    content = request.form["comment_content"].strip()
+    author_id = session.get("_id")
+    author_name = session.get("nickname")
+
+    data = {
+        "post_id" : ObjectId(id),
+        "content" : content,
+        "author_id" : author_id,
+        "author_name" : author_name,
+        "create_date" : datetime.now()
+    }
+
+    post_comment_collection.insert_one(data)
+
+    return redirect(url_for('post_detail', id=id))
+
+@app.route('/community/post/<post_id>/comment/delete/<comment_id>')
+def comment_delete(post_id, comment_id):
+    filter = {"_id" : ObjectId(comment_id)}
+    post_comment_collection.delete_one(filter)
+
+    return redirect(url_for('post_detail', id = post_id))
+
+def get_comments(id):
+    comments = post_comment_collection.find({"post_id" : ObjectId(id)}).sort("create_date", pymongo.DESCENDING)
+
+    return comments
+
 # community 끝
+
+
 
 # 회원 기능 시작
 
