@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="my-3 text-center">
+    <h4 class="text-center py-3 text-decoration-underline">Post</h4>
+    {% include "flashmessage.html" %}
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-6">
+            
+            {% if post is defined %}
+            <form action="{{ url_for('post_write') }}" method="POST">
+            {% else %}
+            <form action="{{ url_for('post_modify', id=post._id) }}" method="POST">
+            {% endif %}
+                <!-- Title input -->
+                <div class="form-outline mb-4">
+                    <input type="text" name="title" id="form3Example3" class="form-control" 
+                    {% if post %} value = {{post.title}} {% endif %}
+                    required>
+                    </input>
+                    <label class="form-label" for="form3Example3">Title</label>
+                </div>
+
+                <!-- Content input -->
+                <div class="form-outline mb-4">
+                    <input type="text" name="content" id="form3Example3" class="form-control" 
+                    {% if post %} value = {{post.content}} {% endif %} required>
+                    </input>
+                    <label class="form-label" for="form3Example3">Content</label>
+                </div>
+
+                <!-- Submit button -->
+                <button type="submit" class="btn btn-primary btn-block mb-4">
+                    완료
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

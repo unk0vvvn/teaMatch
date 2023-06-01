@@ -1,7 +1,9 @@
 from flask import Flask, render_template, url_for, redirect, request, session, flash
+from sejong_univ_auth import auth, ClassicSession
 from bson.objectid import ObjectId 
 import functools
 import bcrypt 
+import secrets
 from datetime import datetime
 import pymongo
 
@@ -14,7 +16,7 @@ post_comment_collection = db['post_comment']
 
 app = Flask(__name__)
 
-app.secret_key = 'fad62b7c1a6a9e67dbb66c3571a23ff2425650965f80047ea2fadce543b088cf'
+app.secret_key = secrets.token_hex(32)
 
 PAGE_SIZE = 10
 
@@ -161,6 +163,17 @@ def get_comments(id):
 # community 끝
 
 
+# mypage 시작
+@app.route('/mypage')
+@login_required
+def mypage_show():
+    user = user_collection.find_one({"_id" : ObjectId(session["_id"])})
+
+    
+    
+    return
+
+# mypage 끝
 
 # 회원 기능 시작
 
@@ -170,6 +183,23 @@ def signup():
         return render_template("signup.html")
     
     #POST
+    #sejong auth 시작
+    sejong_id = request.form['sejong_id'].strip()
+    sejong_password = request.form['sejong_password'].strip()
+
+    result = auth(sejong_id, sejong_password, methods=ClassicSession)
+    if result.success == False:
+        flash('학번과 비밀번호를 다시 한번 확인해주세요.')
+        return redirect(url_for('signup'))
+    
+    student_id = sejong_id
+    major = result.body['major']
+    name = result.body['name']
+    grade = result.body['grade']
+    status = result.body['status']
+
+    #sejong auth 끝
+
     nickname = request.form['nickname'].strip()
     nickname_check = user_collection.find_one({"nickname": nickname})
     if nickname_check:
@@ -195,7 +225,12 @@ def signup():
         'email' : email,
         'password' : encrypted_password,
         'create_date' : datetime.now(),
-        'role' : 'user' # TODO: enum 클래스로 변경 
+
+        'student_id' : student_id,
+        'major' : major,
+        'name' : name,
+        'grade' : grade,
+        'status' : status
     }
 
     user_collection.insert_one(user_data)
