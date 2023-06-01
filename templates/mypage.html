@@ -1,39 +1,64 @@
 {% extends "layout.html" %}
 {% block content %}
 <section class="my-3 text-center">
-    <h4 class="text-center py-3 text-decoration-underline">Post</h4>
+    <h4 class="text-center py-3 text-decoration-underline">마이페이지</h4>
     {% include "flashmessage.html" %}
     <div class="row d-flex justify-content-center">
-        <div class="col-md-6">
-            
-            {% if post is defined %}
-            <form action="{{ url_for('post_write') }}" method="POST">
-            {% else %}
-            <form action="{{ url_for('post_modify', id=post._id) }}" method="POST">
-            {% endif %}
-                <!-- Title input -->
-                <div class="form-outline mb-4">
-                    <input type="text" name="title" id="form3Example3" class="form-control" 
-                    {% if post %} value = {{post.title}} {% endif %}
-                    required>
-                    </input>
-                    <label class="form-label" for="form3Example3">Title</label>
-                </div>
+        <div class="card" style="width: 18rem;">
+            <h5 class="card-title">세종 포털 정보</h5>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item">이름: {{user.name}}</li>
+              <li class="list-group-item">학년: {{user.grade}}</li>
+              <li class="list-group-item">전공: {{user.major}}</li>
+              <li class="list-group-item">재학 상태: {{user.status}}</li>
+            </ul>
+          </div>
+    </div>
+    <hr>
+    <div class="row d-flex justify-content-center">
+        <div class="card" style="width: 18rem;">
+            <h5 class="card-title">자기 소개
+                <a class="btn-outline-secondary" href="{{url_for('mypage_update')}}">수정하기</a>
+            </h5>
+            <ul class="list-group list-group-flush">
+                {% if user.position is defined %}
+                <li class="list-group-item">
+                    <a href="{{user.position}}"></a>
+                </li>
+                {% else %}
+                <li class="list-group-item">본인의 포지션을 선택해주세요.</li>
+                {% endif %}
 
-                <!-- Content input -->
-                <div class="form-outline mb-4">
-                    <input type="text" name="content" id="form3Example3" class="form-control" 
-                    {% if post %} value = {{post.content}} {% endif %} required>
-                    </input>
-                    <label class="form-label" for="form3Example3">Content</label>
-                </div>
+                {% if user.github_link is defined %}
+                <li class="list-group-item">
+                    <a href="{{user.github_link}}"></a>
+                </li>
+                {% else %}
+                <li class="list-group-item">깃허브 주소를 설정해주세요.</li>
+                {% endif %}
 
-                <!-- Submit button -->
-                <button type="submit" class="btn btn-primary btn-block mb-4">
-                    완료
-                </button>
-            </form>
-        </div>
+                {% if user.scholarship_history is defined %}
+                    {% for history in user.scholarship_history %}
+                        <li class="list-group-item">년도/학기: {{history.year}} 장학명: {{history.name}}
+                    {% endfor %}
+                {% else %}
+                <li class="list-group-item">장학 이력을 첨부해주세요.</li>
+                {% endif %}
+                
+                {% if user.transcript is defined %}
+                <li class="list-group-item">전공 평점:{{user.transcript.major}} 전체 평점:{{user.transcript.total}}</li>
+                {% else %}
+                <li class="list-group-item">기이수 성적을 첨부해주세요.</li>
+                {% endif %}
+
+                {% if user.note is defined %}
+                <li class="list-group-item">{{user.note}}</li>
+                {% else %}
+                <li class="list-group-item">추가적으로 본인이 자랑하고 싶은 것들을 써보세요.</li>
+                {% endif %}
+
+            </ul>
+          </div>
     </div>
 </section>
 {% endblock %}

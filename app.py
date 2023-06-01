@@ -169,9 +169,20 @@ def get_comments(id):
 def mypage_show():
     user = user_collection.find_one({"_id" : ObjectId(session["_id"])})
 
+    return render_template("mypage.html", user = user)
+
+@app.route('/mypage/update', methods=["GET", "POST"])
+@login_required
+def mypage_update():
+    if request.method == "GET":
+        user = user_collection.find_one({"_id" : ObjectId(session["_id"])})
+
+        return render_template("mypage_form.html", user = user)
     
+    #post
+
     
-    return
+    return redirect(url_for('mypage_show'))
 
 # mypage 끝
 

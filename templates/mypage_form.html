@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="my-3 text-center">
+    <h4 class="text-center py-3">마이페이지</h4>
+    {% include "flashmessage.html" %}
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-6">
+            
+            <form action="{{ url_for('mypage_update') }}" method="POST" enctype = "multipart/form-data">
+                <!-- 포지션 선택-->
+
+                <!-- 깃 허브 주소 설정-->
+
+                <!-- 장학 이력 업로드 -->
+                <div class="form-outline mb-4">
+                    <input type = "file" name = "file" />
+                    <input type = "submit"/>
+                </div>
+
+                <!-- 기이수 성적 업로드 -->
+                <div class="form-outline mb-4">
+                    <input type = "file" name = "file" />
+                    <input type = "submit"/>
+                </div>
+
+                <!-- 자유 소개 설정-->
+
+                <!-- Submit button -->
+                <button type="submit" class="btn btn-primary btn-block mb-4">
+                    완료
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
