@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <title>Welcome to my new homepage!</title>
+    <title>team matching</title>
     <!-- MDB icon -->
     <link rel="icon" href="{{ url_for('static', filename='img/new-icon.png') }}" type="image/x-icon" />
     <!-- MDB -->
@@ -55,6 +55,10 @@
                     <!-- right menu -->
                     <ul class="navbar-nav d-flex flex-row">
                         {% if session['_id'] is defined %}
+                        <li class="nav-item me-3 me-lg-0">
+                            <a class="nav-link" href="{{ url_for('mypage_show') }}">Mypage</a>
+                        </li>
+
                         <li class="nav-item me-3 me-lg-0">
                             <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                         </li>
