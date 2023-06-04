@@ -8,22 +8,43 @@
             
             <form action="{{ url_for('mypage_update') }}" method="POST" enctype = "multipart/form-data">
                 <!-- 포지션 선택-->
-
-                <!-- 깃 허브 주소 설정-->
-
-                <!-- 장학 이력 업로드 -->
                 <div class="form-outline mb-4">
-                    <input type = "file" name = "file" />
-                    <input type = "submit"/>
+                <label for="pos">포지션 선택</label>
+                <select name="position" id="pos" {% if user.position is defined %} selected="{{user.position}}" {%endif%}>
+                    {% for position in positions %}
+                        <option value="{{position}}">{{position}}</option>
+                    {% endfor %}
+                </select>
                 </div>
+                <hr>
+                <!-- 깃 허브 주소 설정-->
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label">깃허브 주소</label>
+                    <input type="text" name="github_link" class="form-control" id="exampleFormControlInput1" placeholder="깃허브 주소를 입력해주세요."
+                    {% if user.github_link is defined %} value="{{user.github_link}}" {% endif %}>
+                </div>
+
+                <hr>
+                <!-- 장학 이력 업로드 -->
+                <div class="mb-3">
+                    <label for="scholarship_history_file" class="form-label">장학 이력</label>
+                    <input class="form-control" type="file" id="scholarship_history_file" name = "scholarship_history_file">
+                  </div>
+                <hr>
 
                 <!-- 기이수 성적 업로드 -->
-                <div class="form-outline mb-4">
-                    <input type = "file" name = "file" />
-                    <input type = "submit"/>
-                </div>
+
+                <div class="mb-3">
+                    <label for="course_history_file" class="form-label">기이수 성적</label>
+                    <input class="form-control" type="file" id="course_history_file" name = "course_history_file">
+                  </div>
+                <hr>
 
                 <!-- 자유 소개 설정-->
+                <div class="mb-3">
+                    <label for="exampleFormControlTextarea1" class="form-label">자기소개</label>
+                    <textarea class="form-control" id="exampleFormControlTextarea1" name="self_introduction" rows="5" placeholder="자유롭게 본인을 소개해보세요.">{% if user.self_introduction is defined %}{{user.self_introduction}}{% endif %}</textarea>
+                </div>
 
                 <!-- Submit button -->
                 <button type="submit" class="btn btn-primary btn-block mb-4">

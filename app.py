@@ -1,4 +1,5 @@
 from flask import Flask, render_template, url_for, redirect, request, session, flash
+from werkzeug.utils import secure_filename
 from sejong_univ_auth import auth, ClassicSession
 from bson.objectid import ObjectId 
 import functools
@@ -6,19 +7,22 @@ import bcrypt
 import secrets
 from datetime import datetime
 import pymongo
-
+import pandas
+import os
 
 client = pymongo.MongoClient("mongodb://localhost:27017/") 
 db = client["virtual_tour"] 
 user_collection = db['user'] 
 post_collection = db['post'] 
 post_comment_collection = db['post_comment']
+configure_collection = db['configure']
 
 app = Flask(__name__)
 
 app.secret_key = secrets.token_hex(32)
 
 PAGE_SIZE = 10
+FILE_UPLOAD_PATH = "./upload/"
 
 def login_required(view):
     @functools.wraps(view)
@@ -33,6 +37,14 @@ def login_required(view):
 
 @app.route('/')
 def home():
+    #설정 데이터 삽입. 기본 데이터 같이 들고 다닐 수 있는 방법 찾기
+    if configure_collection.find_one({'name': '포지션'}) is None:
+        configure_collection.insert_one({
+            'name': '포지션',
+            'positions': ['AI', 'FRONTEND', 'BACKEND']
+        })
+
+    #설정 데이터 끝
     return render_template("home.html")
 
 # community 시작
@@ -176,13 +188,110 @@ def mypage_show():
 def mypage_update():
     if request.method == "GET":
         user = user_collection.find_one({"_id" : ObjectId(session["_id"])})
+        positions = configure_collection.find_one({"name":"포지션"})
 
-        return render_template("mypage_form.html", user = user)
+        return render_template("mypage_form.html", user = user, positions = positions['positions'])
     
     #post
 
-    
+    data_setter = {'position' : request.form['position']}
+    if request.form['github_link'] != '':
+        data = request.form['github_link'].strip() 
+
+        data_setter['github_link'] = data
+
+    if request.files['scholarship_history_file'].filename != '':
+        file = request.files['scholarship_history_file']
+        file.filepath = f'{FILE_UPLOAD_PATH}{secure_filename(file.filename)}'
+        data = process_scholarship_history(file)
+
+        data_setter['scholarship_history'] = data
+
+    if request.files['course_history_file'].filename != '':
+        file = request.files['course_history_file']
+        file.filepath = f'{FILE_UPLOAD_PATH}{secure_filename(file.filename)}'
+        course_history, gpa, major_gpa = process_course_history(file)
+
+        transcript = {
+            'course_history' : course_history,
+            'gpa' : gpa,
+            'major_gpa' : major_gpa
+        }
+        data_setter['transcript'] = transcript
+
+    if request.form['self_introduction'] != '':
+        data = request.form['self_introduction'].strip() 
+
+        data_setter['self_introduction'] = data
+        
+    filter = {'_id' : ObjectId(session['_id'])}
+    data ={
+        "$set" : data_setter
+    }
+    user_collection.update_one(filter, data)
+
     return redirect(url_for('mypage_show'))
+
+def process_scholarship_history(file):
+    file.save(file.filepath)
+
+    df = pandas.read_excel(file.filepath, usecols=[1, 2], skiprows=[0,1,2])
+
+    ret = {}
+    for row in df.iterrows():
+        k = row[1]['년도/학기']
+        v = row[1]['장학명']
+
+        if k in ret:
+            ret[k].append(v)
+        else:
+            ret[k] = [v]
+
+    os.unlink(file.filepath)
+
+    return ret
+
+def process_course_history(file):
+    file.save(file.filepath)
+
+    df = pandas.read_excel(file.filepath, usecols=[1, 2, 4, 5, 8, 9, 11], skiprows=[0,1,2])
+
+    total_credit = 0
+    total_grade = 0
+
+    major_credit = 0
+    major_grade = 0
+    course_history = {}
+    for row in df.iterrows():
+        k = f"{row[1]['년도']}/{row[1]['학기']}"
+        data = {
+            '교과목명':row[1]['교과목명'],
+            '이수구분':row[1]['이수구분'],
+            '학점':row[1]['학점'],
+            '평가방식':row[1]['평가방식'],
+            '평점':row[1]['평점']
+        }
+        if k in course_history:
+            course_history[k].append(data)
+        else:
+            course_history[k] = [data]
+
+        if row[1]['평가방식'] == 'P/NP':
+            continue
+
+        total_credit += row[1]['학점']
+        total_grade += row[1]['평점'] * row[1]['학점']
+
+        if '전선' == row[1]['이수구분'] or '전필' == row[1]['이수구분']:
+            major_credit += row[1]['학점']
+            major_grade += row[1]['평점'] * row[1]['학점']
+
+    gpa = round(total_grade / total_credit, 2)
+    major_gpa = round(major_grade / major_credit, 2)
+
+    os.unlink(file.filepath)
+
+    return course_history, gpa, major_gpa
 
 # mypage 끝
 
@@ -281,4 +390,4 @@ def logout():
 # 회원 기능 끝
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True, port=5050) 
