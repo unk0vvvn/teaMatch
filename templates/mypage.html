@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 <section class="my-3 text-center">
-    <h4 class="text-center py-3 text-decoration-underline">마이페이지</h4>
+    <h4 class="text-center py-3">마이페이지</h4>
     {% include "flashmessage.html" %}
     <div class="row d-flex justify-content-center">
         <div class="card" style="width: 18rem;">
@@ -21,38 +21,48 @@
                 <a class="btn-outline-secondary" href="{{url_for('mypage_update')}}">수정하기</a>
             </h5>
             <ul class="list-group list-group-flush">
+
+                <mark>포지션</mark>
                 {% if user.position is defined %}
                 <li class="list-group-item">
-                    <a href="{{user.position}}"></a>
+                    {{user.position}}
                 </li>
                 {% else %}
                 <li class="list-group-item">본인의 포지션을 선택해주세요.</li>
                 {% endif %}
 
+                <mark>깃허브</mark>
                 {% if user.github_link is defined %}
-                <li class="list-group-item">
-                    <a href="{{user.github_link}}"></a>
-                </li>
+                <a href="{{user.github_link}}">
+                    <li class="list-group-item">
+                        {{user.github_link}}
+                    </li>
+                </a>
                 {% else %}
                 <li class="list-group-item">깃허브 주소를 설정해주세요.</li>
                 {% endif %}
-
+                
+                <mark>장학이력</mark>
                 {% if user.scholarship_history is defined %}
-                    {% for history in user.scholarship_history %}
-                        <li class="list-group-item">년도/학기: {{history.year}} 장학명: {{history.name}}
+                    {% for year, scholarships in user.scholarship_history.items() %}
+                        {% for s in scholarships %}
+                            <li class="list-group-item small">시기: {{year}}<br>장학명: {{s}}</li>
+                        {% endfor %}
                     {% endfor %}
                 {% else %}
                 <li class="list-group-item">장학 이력을 첨부해주세요.</li>
                 {% endif %}
                 
+                <mark>성적</mark>
                 {% if user.transcript is defined %}
-                <li class="list-group-item">전공 평점:{{user.transcript.major}} 전체 평점:{{user.transcript.total}}</li>
+                <li class="list-group-item">전공 평점:{{user.transcript.major_gpa}}<br>전체 평점:{{user.transcript.gpa}}</li>
                 {% else %}
                 <li class="list-group-item">기이수 성적을 첨부해주세요.</li>
                 {% endif %}
 
-                {% if user.note is defined %}
-                <li class="list-group-item">{{user.note}}</li>
+                <mark>자기소개</mark>
+                {% if user.self_introduction is defined %}
+                <li class="list-group-item">{{user.self_introduction}}</li>
                 {% else %}
                 <li class="list-group-item">추가적으로 본인이 자랑하고 싶은 것들을 써보세요.</li>
                 {% endif %}
