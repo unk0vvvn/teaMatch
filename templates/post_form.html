@@ -7,9 +7,9 @@
         <div class="col-md-6">
             
             {% if post is defined %}
-            <form action="{{ url_for('post_write') }}" method="POST">
-            {% else %}
             <form action="{{ url_for('post_modify', id=post._id) }}" method="POST">
+            {% else %}
+            <form action="{{ url_for('post_write') }}" method="POST">
             {% endif %}
                 <!-- Title input -->
                 <div class="form-outline mb-4">
