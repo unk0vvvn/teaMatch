@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="my-3 text-center">
+    <h4 class="text-center py-3 text-decoration-underline">Recruit</h4>
+    {% include "flashmessage.html" %}
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-6">
+            
+            {% if recruit is defined %}
+            <form action="{{ url_for('recruit_modify', id=recruit._id) }}" method="POST">
+            {% else %}
+            <form action="{{ url_for('recruit_write') }}" method="POST">
+            {% endif %}
+                <!-- 제목 -->
+                <div class="form-outline mb-4">
+                    <input type="text" name="title" id="form3Example3" class="form-control" 
+                    {% if recruit is defined %} value = {{recruit.title}} {% endif %}
+                    placeholder="김세종 교수님/웹프로그래밍 수업 과제 팀원 구합니다. ㅇㅇ대회 팀원 구합니다."
+                    required>
+                    </input>
+                    <label class="form-label" for="form3Example3">제목</label>
+                </div>
+
+                <!-- 설명 -->
+                <div class="form-outline mb-4">
+                    <textarea class="form-control" id="form3Example3" name="content" 
+                    rows="5"required>{% if recruit is defined %} value = {{recruit.content}} {% endif %}</textarea>
+                    <label class="form-label" for="form3Example3">설명</label>
+                </div>
+                
+                <label class="mb-3" for="pos">모집 포지션</label><br>
+                {% for position in positions %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="required_positions" value="{{position}}" id="{{position}}">
+                    <label class="form-check-label" for="{{position}}">{{position}}</label>
+                </div>
+                {% endfor %}
+                <br>
+
+                <!-- Submit button -->
+                <button type="submit" class="btn btn-primary btn-block mb-4">
+                    완료
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

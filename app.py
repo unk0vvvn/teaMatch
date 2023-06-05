@@ -14,7 +14,8 @@ client = pymongo.MongoClient("mongodb://localhost:27017/")
 db = client["virtual_tour"] 
 user_collection = db['user'] 
 post_collection = db['post'] 
-post_comment_collection = db['post_comment']
+comment_collection = db['comment']
+recruit_collection = db['recruit']
 configure_collection = db['configure']
 
 app = Flask(__name__)
@@ -41,11 +42,101 @@ def home():
     if configure_collection.find_one({'name': '포지션'}) is None:
         configure_collection.insert_one({
             'name': '포지션',
-            'positions': ['AI', 'FRONTEND', 'BACKEND']
+            'positions': ['AI', 'FRONTEND', 'BACKEND', 'SECURITY']
         })
 
     #설정 데이터 끝
     return render_template("home.html")
+
+def get_positions():
+    return configure_collection.find_one({"name":"포지션"})['positions']
+
+# 팀원 모집 recruit 시작
+
+@app.route('/recruit')
+def recruit_list():
+    page = request.args.get('page', default = 0, type = int)
+    page_offset = page * PAGE_SIZE
+    
+    recruit_count = recruit_collection.count_documents({})
+    recruits = recruit_collection.find().sort("create_date", pymongo.DESCENDING).skip(page_offset).limit(PAGE_SIZE)
+
+    return render_template("recruit_list.html", recruits = recruits, page = page, recruit_count = recruit_count, page_size = PAGE_SIZE)
+
+@app.route('/recruit/write', methods=['GET', 'POST'])
+@login_required
+def recruit_write():
+    if request.method == 'GET':
+        return render_template("recruit_form.html", positions = get_positions())
+    
+    #POST
+    title = request.form['title'].strip()
+    content = request.form['content'].strip()
+    required_positions = request.form.getlist('required_positions')
+
+    data = {
+        'title' : title,
+        'content' : content,
+        'required_positions' : required_positions,
+        'create_date' : datetime.now(),
+        'leader' : session['nickname'],
+        'leader_id' : session['_id'],
+        'view_count' : 0
+    }
+
+    result = recruit_collection.insert_one(data)
+
+    return redirect(url_for('recruit_detail', id=str(result.inserted_id)))
+
+@app.route('/recruit/<id>')
+def recruit_detail(id):
+    recruit_collection.update_one({"_id" : ObjectId(id)},
+                                {
+                                '$inc': {
+                                    'view_count':1
+                                }})
+
+    recruit = recruit_collection.find_one({"_id" : ObjectId(id)})
+    comments = list(get_comments(id))
+    
+    return render_template("recruit_detail.html", recruit = recruit, comments = comments)
+
+@app.route('/recruit/modify/<id>', methods=['GET', 'POST'])
+@login_required
+def recruit_modify(id):
+    if request.method == 'GET':
+        recruit = recruit_collection.find_one({"_id" : ObjectId(id)})
+
+        return render_template("recruit_form.html", recruit = recruit)
+    
+    #POST
+    filter = {"_id" : ObjectId(id)}
+
+    title = request.form['title'].strip()
+    content = request.form['content'].strip()
+    required_positions = request.form.getlist('required_positions')
+    data ={
+    "$set" : {
+        'title' : title,
+        'content' : content,
+        'required_positions' : required_positions,
+        'modify_date' : datetime.now()
+        }
+    }
+
+    post_collection.update_one(filter, data)
+
+    return redirect(url_for('required_detail', id=id))
+
+@app.route('/recruit/delete/<id>')
+@login_required
+def recruit_delete(id):
+    recruit_collection.delete_one({"_id" : ObjectId(id)})
+
+    return redirect(url_for('recruit_list'))
+
+# 팀원 모집 recruit 끝
+
 
 # community 시작
 
@@ -85,27 +176,17 @@ def post_write():
 
 @app.route('/community/post/<id>')
 def post_detail(id):
-    increase_view_count(id)
+    post_collection.update_one({"_id" : ObjectId(id)},
+                                {
+                                '$inc': {
+                                    'view_count':1
+                                }})
 
     post = post_collection.find_one({"_id" : ObjectId(id)})
     comments = list(get_comments(id))
     
     return render_template("post_detail.html", post = post, comments = comments)
-
-def increase_view_count(id):
-    filter = {"_id" : ObjectId(id)}
-
-    post = post_collection.find_one(filter)
-
-    data ={
-    "$set" : {
-        "view_count" : post["view_count"]+1,
-        }
-    }
-
-    post_collection.update_one(filter, data)
     
-
 @app.route('/community/post/modify/<id>', methods=['GET', 'POST'])
 @login_required
 def post_modify(id):
@@ -156,19 +237,20 @@ def comment_write(id):
         "create_date" : datetime.now()
     }
 
-    post_comment_collection.insert_one(data)
+    comment_collection.insert_one(data)
+    post_collection.update_one({'_id' : data['post_id']}, 
+                               {'$inc': {'comment_count': 1}})
 
     return redirect(url_for('post_detail', id=id))
 
 @app.route('/community/post/<post_id>/comment/delete/<comment_id>')
 def comment_delete(post_id, comment_id):
-    filter = {"_id" : ObjectId(comment_id)}
-    post_comment_collection.delete_one(filter)
+    comment_collection.delete_one({"_id" : ObjectId(comment_id)})
 
     return redirect(url_for('post_detail', id = post_id))
 
 def get_comments(id):
-    comments = post_comment_collection.find({"post_id" : ObjectId(id)}).sort("create_date", pymongo.DESCENDING)
+    comments = comment_collection.find({"post_id" : ObjectId(id)}).sort("create_date", pymongo.DESCENDING)
 
     return comments
 
@@ -188,9 +270,9 @@ def mypage_show():
 def mypage_update():
     if request.method == "GET":
         user = user_collection.find_one({"_id" : ObjectId(session["_id"])})
-        positions = configure_collection.find_one({"name":"포지션"})
+        positions = get_positions()
 
-        return render_template("mypage_form.html", user = user, positions = positions['positions'])
+        return render_template("mypage_form.html", user = user, positions = positions)
     
     #post
 
@@ -390,4 +472,4 @@ def logout():
 # 회원 기능 끝
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5050) 
+    app.run(debug=True, port=5500) 
