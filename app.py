@@ -51,7 +51,10 @@ def home():
         })
 
     #설정 데이터 끝
-    return render_template("home.html")
+    posts = post_collection.find().sort("view_count", pymongo.DESCENDING).limit(PAGE_SIZE//2)
+    recruits = recruit_collection.find().sort("view_count", pymongo.DESCENDING).limit(PAGE_SIZE//2)
+
+    return render_template("home.html", posts = posts, recruits = recruits)
 
 def get_positions():
     return configure_collection.find_one({"name":"포지션"})['positions']

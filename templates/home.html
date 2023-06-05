@@ -1,4 +1,82 @@
 {% extends "layout.html" %}
 {% block content %}
-   
+<section class="my-3 text-center">
+
+    <p class="h3 m-3 d-flex justify-content-start">인기 프로젝트</p>
+    <table class="table">
+        <thead class="table-primary">
+            <tr class="text-center">
+                <th>순위</th>
+                <th style="width:30%">제목</th>
+                <th>모집 포지션</th>
+                <th>리더</th>
+                <th>작성일시</th>
+                <th>조회수</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recruit in recruits %}
+            <tr class="text-center">
+                <td>{{loop.index}}</td> 
+
+                <td class="text-start text-truncate">
+                    <a href = "{{ url_for('recruit_detail', id=recruit._id) }}">{{recruit.title}}</a>
+
+                    {% if recruit.comment_count is defined and recruit.comment_count > 0 %}
+                    <span class="text-danger small ms-2">{{recruit.comment_count}}</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% for position in recruit.required_positions %}
+                    <span>{{position}}</span>
+                    {% endfor %}
+                </td>
+                
+                <td>{{recruit.leader}}</td>
+                 
+                <td>{{recruit.create_date}}</td>
+                
+                <td>{{recruit.view_count}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <hr>
+    <br>
+
+    <p class="h3 m-3 d-flex justify-content-start">인기 게시글</p>
+    <table class="table">
+        <thead class="table-primary">
+            <tr class="text-center">
+                <th>순위</th>
+                <th style="width:50%">제목</th>
+                <th>글쓴이</th>
+                <th>작성일시</th>
+                <th>조회수</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for post in posts %}
+            <tr class="text-center">
+                <td>{{loop.index}}</td> 
+
+                <td class="text-start">
+                    <a href = "{{ url_for('post_detail', id=post._id) }}">{{post.title}}</a>
+
+                    {% if post.comment_count is defined and post.comment_count > 0 %}
+                    <span class="text-danger small ms-2">{{post.comment_count}}</span>
+                    {% endif %}
+                </td>
+                
+                <td>{{post.author}}</td>
+                 
+                <td>{{post.create_date}}</td>
+                
+                <td>{{post.view_count}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
 {% endblock %}
