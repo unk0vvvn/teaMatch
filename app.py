@@ -180,6 +180,11 @@ def recruit_delete(id):
 @login_required
 def recruit_apply(id):
     applicant_id = ObjectId(session['_id'])
+    result = user_collection.find_one({'_id' : applicant_id}, {'_id':1})
+    if result is not None:
+        flash('현재 진행중인 프로젝트가 있습니다. 프로젝트를 완료시켜주세요.')
+        return redirect(url_for('recruit_detail', id=id))
+
     filter = {'_id' : ObjectId(id)}
     result = recruit_collection.find_one(filter, {'applicants':1, '_id':0})['applicants']
     for r in result:
@@ -194,6 +199,12 @@ def recruit_apply(id):
         }   
     }
     recruit_collection.update_one(filter, data)
+
+    user_collection.update_one({'_id' : applicant_id},
+                                {"$set" : {
+                                    'project_id' : ObjectId(id),
+                                    }
+                                })
 
     return redirect(url_for('recruit_detail', id=id))
 
