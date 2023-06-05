@@ -14,7 +14,7 @@
                 <!-- 제목 -->
                 <div class="form-outline mb-4">
                     <input type="text" name="title" id="form3Example3" class="form-control" 
-                    {% if recruit is defined %} value = {{recruit.title}} {% endif %}
+                    {% if recruit is defined %} value={{recruit.title}} {% endif %}
                     placeholder="김세종 교수님/웹프로그래밍 수업 과제 팀원 구합니다. ㅇㅇ대회 팀원 구합니다."
                     required>
                     </input>
@@ -24,11 +24,11 @@
                 <!-- 설명 -->
                 <div class="form-outline mb-4">
                     <textarea class="form-control" id="form3Example3" name="content" 
-                    rows="5"required>{% if recruit is defined %} value = {{recruit.content}} {% endif %}</textarea>
+                    rows="5"required>{% if recruit is defined %}{{recruit.content}}{% endif %}</textarea>
                     <label class="form-label" for="form3Example3">설명</label>
                 </div>
                 
-                <label class="mb-3" for="pos">모집 포지션</label><br>
+                <h5><strong>모집 포지션</strong></h5><br>
                 {% for position in positions %}
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="required_positions" value="{{position}}" id="{{position}}">

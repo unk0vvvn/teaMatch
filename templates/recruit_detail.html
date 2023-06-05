@@ -2,16 +2,24 @@
 {% block content %}
 <section class="my-3 text-center">
 	<h2 class="border-bottom py-2">{{recruit.title}}</h2>
+	{% include "flashmessage.html" %}
 	<div class="card my-3">
 		<div class="card-body">
 			<div class="card-text">
 				<dl class="row">
-					<dt class="col-sm-5">모집 포지션</dt>
+					<dt class="col-sm-2">모집 포지션</dt>
 					{% for position in recruit.required_positions %}
-						<dd class="col-sm-1"><strong>{{position}}</strong></dd>
+						<dd class="col-sm-1"><small>{{position}}</small></dd>
 					{% endfor %}
 				</dl>
-				
+				<hr>
+
+				<dl class="row">
+					<dt class="col-sm-2">지원자 수</dt>
+					<dd class="col-sm-1"><small>{% if recruit.applicants is defined %}{{recruit.applicants | count}}{%else%}0{%endif%}</small></dd>
+				</dl>
+
+				<hr>
 				<span>{{recruit.content}}</span>
 
 				
@@ -33,19 +41,21 @@
 				</div>
 			</div>
 
-			<div class="my-3">
+			<div class="my-3 d-flex justify-content-end">
 				{% if session['_id'] == recruit.leader_id %}
 				<a href="{{url_for('recruit_modify', id=recruit._id)}}" class="btn btn-sm btn-outline-secondary">수정</a>
 
 				<a href="{{url_for('recruit_delete', id=recruit._id)}}" class="delete btn btn-sm btn-outline-secondary">삭제</a>
 
+				{% else %}
+				<a href="{{url_for('recruit_apply', id=recruit._id)}}" class="btn btn-sm btn-primary">지원하기</a>
 				{% endif %}
 			</div>
 
 			<!-- 댓글 시작 -->
 			<h5 class="border-bottom my-3 py-2">{{comments|count}}개의 댓글이 있습니다.</h5>
 
-			<form action="{{url_for('comment_write', id=recruit._id)}}" method="post"  class="my-3">
+			<form action="{{url_for('recruit_comment_write', id=recruit._id)}}" method="post"  class="my-3">
 				<textarea name="comment_content" rows=1 class="form-control" {% if session['_id'] is not defined %} disabled  placeholder="로그인 후에 댓글을 작성해주세요."{%endif%}></textarea>
 				
 				<input type="submit" class="btn btn-primary my-2 " {% if session['_id'] is not defined %} disabled {%endif%} value="댓글 작성"></submit>
@@ -65,7 +75,7 @@
 					
 					{% if session['_id'] == comment.author_id %}
 					<div class = "my-3">
-						<a href="{{url_for('comment_delete', post_id=post._id, comment_id=comment._id)}}" 
+						<a href="{{url_for('recruit_comment_delete', recruit_id=recruit._id, comment_id=comment._id)}}" 
 						 class="delete btn btn-sm btn-outline-secondary">삭제</a>
 					</div>
 					{% endif %}
