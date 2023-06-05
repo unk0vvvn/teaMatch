@@ -9,7 +9,7 @@
             <form action="{{ url_for('mypage_update') }}" method="POST" enctype = "multipart/form-data">
                 <!-- 포지션 선택-->
                 <div class="form-outline mb-4">
-                <label for="pos">포지션 선택</label>
+                <label class="mb-3" for="pos">포지션 선택</label><br>
                 <select name="position" id="pos" {% if user.position is defined %} selected="{{user.position}}" {%endif%}>
                     {% for position in positions %}
                         <option value="{{position}}">{{position}}</option>

@@ -21,10 +21,10 @@
                 </div>
 
                 <!-- Content input -->
+                    
                 <div class="form-outline mb-4">
-                    <input type="text" name="content" id="form3Example3" class="form-control" 
-                    {% if post %} value = {{post.content}} {% endif %} required>
-                    </input>
+                    <textarea class="form-control" id="form3Example3" name="content" 
+                    rows="5"required>{% if post %}{{post.content}}{% endif %}</textarea>
                     <label class="form-label" for="form3Example3">Content</label>
                 </div>
 

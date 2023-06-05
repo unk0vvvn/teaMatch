@@ -3,18 +3,18 @@
 <section class="my-3 text-center">
     <h4 class="text-center py-3 text-decoration-underline">Community</h4>
     <div class="row my-3">
-		<div class="col-1">
+		<div class="col-6 d-flex justify-content-start">
 			<a class="btn btn-primary" href="{{url_for('post_write')}}">글쓰기</a>
 		</div>
 		
-		<!-- TODO: 검색 기능
-            <div class="col-6">
-		
-			<form class="input-group" th:action="@{/question/list}" method="get">
-				<input name="kw" type="text" class="form-control" th:value="${kw}">
-				<button class="btn btn-outline-secondary" type="submit">찾기</button>
-			</form>
-		</div> -->
+        <div class="col-6 d-flex justify-content-end">
+            <div class="col-xs-3">
+                <form class="input-group " action="{{url_for('post_list')}}" method="get">
+                    <input name="keyword" type="text" class="form-control" value="{{keyword}}">
+                    <button class="btn btn-outline-secondary" type="submit">찾기</button>
+                </form>
+            </div>
+		</div>
 	</div>
 
     <table class="table">
@@ -34,13 +34,13 @@
 
                 <td class="text-start">
                     <a href = "{{ url_for('post_detail', id=post._id) }}">{{post.title}}</a>
-                    <!-- <span class="text-danger small ms-2" th:if="${question.answerCount > 0}" 
-                    th:text="${question.answerCount}"></span> 댓글 구현-->
+
+                    {% if post.comment_count is defined and post.comment_count > 0 %}
+                    <span class="text-danger small ms-2">{{post.comment_count}}</span>
+                    {% endif %}
                 </td>
                 
-                <td>
-                    <span>{{post.author}}</span>
-                </td>
+                <td>{{post.author}}</td>
                  
                 <td>{{post.create_date}}</td>
                 
