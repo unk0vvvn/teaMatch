@@ -14,11 +14,21 @@
 				</dl>
 				<hr>
 
+				
 				<dl class="row">
-					<dt class="col-sm-2">지원자 수</dt>
-					<dd class="col-sm-1"><small>{% if recruit.applicants is defined %}{{recruit.applicants | count}}{%else%}0{%endif%}</small></dd>
+					<dt class="col-sm-2">지원자</dt>
+					<dd class="col-sm-1"><small>{% if recruit.applicants is defined %}{{recruit.applicants | count}}{%else%}0{%endif%}명</small></dd>
+				
+					
+					{% if session['_id'] == recruit.leader_id %}
+					{% for applicant in recruit.applicants %}
+					<dd class="col-sm-2">
+						<a href="{{url_for('profile_show', user_id=applicant)}}" class="btn btn-sm btn-primary mx-2">{{loop.index}}번 지원자</a>
+					</dd>
+					{% endfor %}
+					{% endif %}
+					
 				</dl>
-
 				<hr>
 				<span>{{recruit.content}}</span>
 
@@ -47,9 +57,10 @@
 
 				<a href="{{url_for('recruit_delete', id=recruit._id)}}" class="delete btn btn-sm btn-outline-secondary mx-2">삭제</a>
 
+
 				{% elif session['_id'] is defined %}
 				<a href="{{url_for('recruit_apply', id=recruit._id)}}" class="btn btn-sm btn-primary mx-2">지원하기</a>
-
+				<a href="{{url_for('recruit_apply_cancel', recruit_id=recruit._id)}}" class="btn btn-sm btn-danger mx-2">지원 취소</a>
 				<a href="{{url_for('profile_show', user_id=recruit.leader_id)}}" class="btn btn-sm btn-primary mx-2">리더 프로필</a>
 				{% endif %}
 			</div>

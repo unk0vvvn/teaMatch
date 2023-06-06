@@ -117,15 +117,20 @@ def recruit_list():
 @app.route('/recruit/write', methods=['GET', 'POST'])
 @login_required
 def recruit_write():
+    user = user_collection.find_one({'_id' : ObjectId(session['_id'])})
+    if 'project_id' in user:
+        flash('현재 진행중인 프로젝트가 있습니다. 프로젝트를 완료시켜주세요.')
+        return redirect(url_for('recruit_list'))
+    elif 'applied_project_id' in user:
+        flash('현재 지원한 프로젝트가 있습니다. 지원을 취소해주세요.')
+        return redirect(url_for('recruit_list'))
+    
     if request.method == 'GET':
         return render_template("recruit_form.html", positions = get_positions())
 
     #POST
-    user = user_collection.find_one({'_id' : ObjectId(session['_id'])}, {'project_id':1})
-    if 'project_id' in user:
-        flash('현재 진행중인 프로젝트가 있습니다. 프로젝트를 완료시켜주세요.')
-        return redirect(url_for('recruit_write'))
-
+    
+    
     title = request.form['title'].strip()
     content = request.form['content'].strip()
     required_positions = request.form.getlist('required_positions')
@@ -143,7 +148,7 @@ def recruit_write():
 
     result = recruit_collection.insert_one(data)
 
-    user_collection.update_one({'_id':session['_id']},
+    user_collection.update_one({'_id':ObjectId(session['_id'])},
                                {
                                    '$set':
                                    {
@@ -196,6 +201,11 @@ def recruit_modify(id):
 @app.route('/recruit/delete/<id>')
 @login_required
 def recruit_delete(id):
+    
+    recruit = recruit_collection.find_one({"_id" : ObjectId(id)})
+    for applicant_id in recruit['applicants']:
+        cancel_applied_project(applicant_id)
+
     recruit_collection.delete_one({"_id" : ObjectId(id)})
 
     user_collection.update_one({'_id' : ObjectId(session['_id'])},
@@ -217,8 +227,8 @@ def recruit_apply(id):
         return redirect(url_for('recruit_detail', id=id))
 
     filter = {'_id' : ObjectId(id)}
-    result = recruit_collection.find_one(filter, {'applicants':1})['applicants']
-    for r in result:
+    result = recruit_collection.find_one(filter, {'applicants':1})
+    for r in result['applicants']:
         if r == applicant_id:
             flash('이전에 지원한 프로젝트입니다.')
             return redirect(url_for('recruit_detail', id=id))
@@ -232,11 +242,43 @@ def recruit_apply(id):
 
     user_collection.update_one({'_id' : applicant_id},
                                 {"$set" : {
-                                    'applied_project_id' : ObjectId(id),
+                                    'applied_project_id' : ObjectId(id)
                                     }
                                 })
 
+    flash('지원이 완료되었습니다.')
     return redirect(url_for('recruit_detail', id=id))
+
+@app.route('/recruit/apply/<recruit_id>/cancel')
+@login_required
+def recruit_apply_cancel(recruit_id):
+    recruit = recruit_collection.find_one({'_id': ObjectId(recruit_id)})
+    is_applicant = False
+    for applicant_id in recruit['applicants']:
+        if applicant_id == ObjectId(session['_id']):
+            is_applicant = True
+            break
+    if is_applicant == False:
+        flash('지원한 프로젝트가 아닙니다.')
+        return redirect(url_for('recruit_detail', id=recruit_id))
+
+    cancel_applied_project(session['_id'])
+    recruit_collection.update_one({'_id': ObjectId(recruit_id)},
+                                  {'$pull': {
+                                      'applicants': ObjectId(session['_id'])
+                                      }
+                                  })
+    flash('지원이 취소되었습니다.')
+    return redirect(url_for('recruit_detail', id=recruit_id))
+
+def cancel_applied_project(user_id):
+    user_collection.update_one({'_id' : ObjectId(user_id)},
+                               {
+                                   '$unset':{
+                                       'applied_project_id':""
+                                   }
+                               })
+
 
 #recruit 댓글 시작
 
@@ -504,6 +546,23 @@ def process_course_history(file):
     return course_history, gpa, major_gpa
 
 # mypage 끝
+
+# myproject 시작
+@app.route('/myproject')
+@login_required
+def myproject_show():
+    user = user_collection.find_one({"_id" : ObjectId(session["_id"])})
+    if 'project_id' not in user and 'applied_project_id' not in user:
+        flash('현재 지원한 프로젝트가 없습니다.')
+        return redirect(url_for('recruit_list'))
+    elif 'project_id' not in user:
+        flash('지원한 프로젝트가 아직 모집 중입니다.')
+        return redirect(url_for('recruit_detail', id = user['applied_project_id']))
+    else:
+        flash('진행중인 프로젝트입니다.')
+        return redirect(url_for('recruit_detail', id = user['project_id']))
+
+# myproject 끝
 
 # 회원 기능 시작
 
