@@ -108,8 +108,13 @@ def recruit_list():
 def recruit_write():
     if request.method == 'GET':
         return render_template("recruit_form.html", positions = get_positions())
-    
+
     #POST
+    user = user_collection.find_one({'_id' : ObjectId(session['_id'])}, {'project_id':1})
+    if 'project_id' in user:
+        flash('현재 진행중인 프로젝트가 있습니다. 프로젝트를 완료시켜주세요.')
+        return redirect(url_for('recruit_write'))
+
     title = request.form['title'].strip()
     content = request.form['content'].strip()
     required_positions = request.form.getlist('required_positions')
@@ -126,6 +131,14 @@ def recruit_write():
     }
 
     result = recruit_collection.insert_one(data)
+
+    user_collection.update_one({'_id':session['_id']},
+                               {
+                                   '$set':
+                                   {
+                                       'project_id':result.inserted_id
+                                   }
+                               })
 
     return redirect(url_for('recruit_detail', id=str(result.inserted_id)))
 
@@ -174,16 +187,27 @@ def recruit_modify(id):
 def recruit_delete(id):
     recruit_collection.delete_one({"_id" : ObjectId(id)})
 
+    user_collection.update_one({'_id' : ObjectId(session['_id'])},
+                               {
+                                   '$unset':{
+                                       'project_id':""
+                                   }
+                               })
+
     return redirect(url_for('recruit_list'))
 
 @app.route('/recruit/apply/<id>')
 @login_required
 def recruit_apply(id):
     applicant_id = ObjectId(session['_id'])
+    result = user_collection.find_one({'_id' : applicant_id}, {'project_id':1})
+    if 'project_id' in result:
+        flash('현재 진행중인 프로젝트가 있습니다. 프로젝트를 완료시켜주세요.')
+        return redirect(url_for('recruit_detail', id=id))
+
     filter = {'_id' : ObjectId(id)}
-    result = recruit_collection.find_one(filter, {'applicants':1, '_id':0})['applicants']
+    result = recruit_collection.find_one(filter, {'applicants':1})['applicants']
     for r in result:
-        print(r)
         if r == applicant_id:
             flash('이전에 지원한 프로젝트입니다.')
             return redirect(url_for('recruit_detail', id=id))
@@ -194,6 +218,12 @@ def recruit_apply(id):
         }   
     }
     recruit_collection.update_one(filter, data)
+
+    user_collection.update_one({'_id' : applicant_id},
+                                {"$set" : {
+                                    'applied_project_id' : ObjectId(id),
+                                    }
+                                })
 
     return redirect(url_for('recruit_detail', id=id))
 
