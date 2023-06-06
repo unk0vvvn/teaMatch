@@ -43,12 +43,14 @@
 
 			<div class="my-3 d-flex justify-content-end">
 				{% if session['_id'] == recruit.leader_id %}
-				<a href="{{url_for('recruit_modify', id=recruit._id)}}" class="btn btn-sm btn-outline-secondary">수정</a>
+				<a href="{{url_for('recruit_modify', id=recruit._id)}}" class="btn btn-sm btn-outline-secondary mx-2">수정</a>
 
-				<a href="{{url_for('recruit_delete', id=recruit._id)}}" class="delete btn btn-sm btn-outline-secondary">삭제</a>
+				<a href="{{url_for('recruit_delete', id=recruit._id)}}" class="delete btn btn-sm btn-outline-secondary mx-2">삭제</a>
 
-				{% else %}
-				<a href="{{url_for('recruit_apply', id=recruit._id)}}" class="btn btn-sm btn-primary">지원하기</a>
+				{% elif session['_id'] is defined %}
+				<a href="{{url_for('recruit_apply', id=recruit._id)}}" class="btn btn-sm btn-primary mx-2">지원하기</a>
+
+				<a href="{{url_for('profile_show', user_id=recruit.leader_id)}}" class="btn btn-sm btn-primary mx-2">리더 프로필</a>
 				{% endif %}
 			</div>
 

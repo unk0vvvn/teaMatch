@@ -83,6 +83,17 @@ def get_comments(id):
 
 #댓글 공통함수 끝
 
+#프로필 profile 시작
+
+@app.route('/profile/<user_id>')
+@login_required
+def profile_show(user_id):
+    user = user_collection.find_one({"_id" : ObjectId(user_id)})
+
+    return render_template("profile.html", user = user)
+
+#프로필 profile 끝
+
 # 팀원 모집 recruit 시작
 
 @app.route('/recruit')
