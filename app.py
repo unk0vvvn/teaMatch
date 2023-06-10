@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)
 
 client = pymongo.MongoClient("mongodb://localhost:27017/") 
-db = client["virtual_tour"] 
+db = client["teaMatch"] 
 user_collection = db['user'] 
 post_collection = db['post'] 
 post_collection.create_index([('title', 'text'),('content', 'text')])
