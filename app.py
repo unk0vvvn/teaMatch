@@ -20,6 +20,9 @@ comment_collection = db['comment']
 recruit_collection = db['recruit']
 recruit_collection.create_index([('title', 'text'),('content', 'text')])
 
+chat_collection = db['chat']
+
+
 configure_collection = db['configure']
 
 
@@ -254,10 +257,15 @@ def recruit_apply_accept(recruit_id, applicant_id):
     if session['_id'] != recruit['leader_id']:
         flash('You are not a leader of the project')
         return redirect(url_for('recruit_detail', id=recruit_id))
+    
+    for mid in recruit['members']:
+        if mid == applicant_id:
+            flash('이미 멤버인 지원자입니다.')
+            return redirect(url_for('recruit_detail', id=recruit_id))
 
     recruit_collection.update_one({'_id': ObjectId(recruit_id)},
                                   {'$push': {
-                                      'members': ObjectId(session['_id'])
+                                      'members': applicant_id
                                       }
                                   })
     
@@ -267,7 +275,7 @@ def recruit_apply_accept(recruit_id, applicant_id):
                                         'applied_project_id':''
                                     },
                                     '$set': {
-                                        'project_id':ObjectId(recruit_id)
+                                        'project_id':recruit_id
                                     }
                                })
 
@@ -303,6 +311,28 @@ def cancel_applied_project(user_id):
                                        'applied_project_id':""
                                    }
                                })
+    
+@app.route('/recruit/<recruit_id>/chat')
+@login_required
+def recruit_chat(recruit_id):
+    messages = chat_collection.find({'parent_id' : recruit_id}).sort("create_date", pymongo.ASCENDING)
+
+    return render_template('recruit_chat.html',recruit_id = recruit_id, messages = messages) 
+
+@app.route('/recruit/<recruit_id>/chat/write', methods=['post'])
+@login_required
+def recruit_chat_write(recruit_id):
+    data = {
+        "parent_id" : recruit_id,
+        "content" : request.form['content'].strip(),
+        "author_id" : session.get('_id'),
+        "author_name" : session.get('nickname'),
+        "create_date" : datetime.now().strftime('%Y-%m-%d, %H:%M:%S')
+    }
+
+    chat_collection.insert_one(data)
+
+    return redirect(url_for('recruit_chat', recruit_id = recruit_id)+'#last')
 
 
 #recruit 댓글 시작

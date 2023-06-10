@@ -1,0 +1,158 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+.received_msg {
+  display: inline-block;
+  padding: 0 0 0 10px;
+  vertical-align: top;
+  width: 92%;
+ }
+ .received_withd_msg p {
+  background: #ebebeb none repeat scroll 0 0;
+  border-radius: 3px;
+  color: #646464;
+  font-size: 14px;
+  margin: 0;
+  padding: 5px 10px 5px 12px;
+  width: 100%;
+}
+.time_date {
+  float:left;
+  color: #747474;
+  display: block;
+  font-size: 12px;
+  margin: 8px 0 0;
+}
+.received_withd_msg { width: 57%;}
+.mesgs {
+  float: left;
+  padding: 30px 15px 0 25px;
+  width: 100%;
+}
+
+ .sent_msg p {
+  background: #05728f none repeat scroll 0 0;
+  border-radius: 3px;
+  font-size: 14px;
+  margin: 0; color:#fff;
+  padding: 5px 10px 5px 12px;
+}
+.outgoing_msg{ overflow:hidden; margin:26px 0 26px;}
+.sent_msg {
+  float: right;
+  width: 46%;
+}
+.input_msg_write input {
+  background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
+  border: medium none;
+  color: #4c4c4c;
+  font-size: 15px;
+  min-height: 48px;
+  width: 100%;
+}
+
+.type_msg {border-top: 1px solid #c4c4c4;position: relative;}
+.msg_send_btn {
+  background: #05728f none repeat scroll 0 0;
+  border: medium none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  font-size: 17px;
+  height: 33px;
+  position: absolute;
+  right: 0;
+  top: 11px;
+}
+.messaging { padding: 0 0 50px 0;}
+.msg_history {
+  height: 516px;
+  overflow-y: auto;
+}
+.msg_cotainer_send{
+		margin-top: auto;
+		margin-bottom: auto;
+		margin-right: 10px;
+		border-radius: 25px;
+		background-color: #78e08f;
+		padding: 10px;
+		position: relative;
+	}
+
+  .msg_cotainer{
+		margin-top: auto;
+		margin-bottom: auto;
+		margin-left: 10px;
+		border-radius: 25px;
+		background-color: #82ccdd;
+		padding: 10px;
+		position: relative;
+	}
+
+  
+</style>
+<section class="my-3 text-center">
+	<div class="messaging container card">
+        <div class="inbox_msg">
+          <div class="mesgs">
+            <div class="msg_history">
+              <div class="card-body msg_card_body">
+                {% for message in messages %}
+                    {% if message.author_id == session['_id'] %}
+                        <div class="outgoing_msg d-flex justify-content-end mb-4">
+                            <div class="msg_cotainer_send">
+                            <p >{{message.content}}</p>
+                            <span class="time_date"> {{message.create_date}}</span> 
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="received_msg d-flex justify-content-start mb-4">
+                            <div class="msg_cotainer">
+                                <p>{{message.content}}</p>
+                                <span class="time_date"> {{message.create_date}}</span> 
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                <div id="last"></div>
+            </div>
+
+            
+            </div>
+          </div>
+        </div>
+        <div class="type_msg">
+          <div class="input_msg_write">
+            <form action="{{url_for('recruit_chat_write', recruit_id = recruit_id)}}" method="post" >
+                <input name="content" type="text" class="write_msg" placeholder="Type a message" />
+                <button type="submit" class="msg_send_btn">send</button>
+            </form>
+          </div>
+      </div>
+      </div>
+      
+</section>
+{% endblock %}
+
+{% block script %}
+{#
+<!-- <script type="text/javascript">
+	
+	$("#add_btn").click(function() {
+
+		$.ajax({
+			type: "POST",
+			url: "{{url_for('comment_write', id=post._id)}}",
+			data: {
+				"author_id" : "{{session['_id']}}",
+				"author_name" : "{{session['nickname']}}",
+				"content" : $("#comment_content").val()
+			},   
+			success: function(result) {
+				location.reload();
+			}
+		});
+	});	
+	
+</script> -->#}
+{% endblock %}
