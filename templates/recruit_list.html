@@ -25,6 +25,7 @@
                 <th style="width:30%">제목</th>
                 <th>모집 포지션</th>
                 <th>리더</th>
+                <th>지원자 수</th>
                 <th>작성일시</th>
                 <th>조회수</th>
             </tr>
@@ -49,6 +50,8 @@
                 </td>
                 
                 <td>{{recruit.leader}}</td>
+
+                <th>{{recruit.applicants | length}}</th>
                  
                 <td>{{recruit.create_date}}</td>
                 

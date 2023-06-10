@@ -2,13 +2,12 @@ from flask import Flask, render_template, url_for, redirect, request, session, f
 from werkzeug.utils import secure_filename
 from sejong_univ_auth import auth, ClassicSession
 from bson.objectid import ObjectId 
-import functools
-import bcrypt 
-import secrets
+import functools, bcrypt, secrets
 from datetime import datetime
-import pymongo
-import pandas
-import os
+import pymongo, pandas, os
+
+app = Flask(__name__)
+app.secret_key = secrets.token_hex(32)
 
 client = pymongo.MongoClient("mongodb://localhost:27017/") 
 db = client["virtual_tour"] 
@@ -23,9 +22,6 @@ recruit_collection.create_index([('title', 'text'),('content', 'text')])
 
 configure_collection = db['configure']
 
-app = Flask(__name__)
-
-app.secret_key = secrets.token_hex(32)
 
 PAGE_SIZE = 10
 FILE_UPLOAD_PATH = "./upload/"
@@ -143,7 +139,8 @@ def recruit_write():
         'leader' : session['nickname'],
         'leader_id' : session['_id'],
         'applicants' : [],
-        'view_count' : 0
+        'view_count' : 0,
+        'members' : [session['_id']]
     }
 
     result = recruit_collection.insert_one(data)
@@ -155,7 +152,7 @@ def recruit_write():
                                        'project_id':result.inserted_id
                                    }
                                })
-
+    
     return redirect(url_for('recruit_detail', id=str(result.inserted_id)))
 
 @app.route('/recruit/<id>')
@@ -248,6 +245,34 @@ def recruit_apply(id):
 
     flash('지원이 완료되었습니다.')
     return redirect(url_for('recruit_detail', id=id))
+
+@app.route('/recruit/apply/<recruit_id>/accept/<applicant_id>')
+@login_required
+def recruit_apply_accept(recruit_id, applicant_id):
+    recruit = recruit_collection.find_one({'_id': ObjectId(recruit_id)})
+    
+    if session['_id'] != recruit['leader_id']:
+        flash('You are not a leader of the project')
+        return redirect(url_for('recruit_detail', id=recruit_id))
+
+    recruit_collection.update_one({'_id': ObjectId(recruit_id)},
+                                  {'$push': {
+                                      'members': ObjectId(session['_id'])
+                                      }
+                                  })
+    
+    user_collection.update_one({'_id' : ObjectId(applicant_id)},
+                               {
+                                   '$unset': {
+                                        'applied_project_id':''
+                                    },
+                                    '$set': {
+                                        'project_id':ObjectId(recruit_id)
+                                    }
+                               })
+
+    return redirect(url_for('recruit_detail', id=recruit_id))
+
 
 @app.route('/recruit/apply/<recruit_id>/cancel')
 @login_required
@@ -658,5 +683,10 @@ def logout():
 
 # 회원 기능 끝
 
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=5500) 
+
+
+
