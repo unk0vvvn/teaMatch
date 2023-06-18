@@ -1,0 +1,7 @@
+sejong-univ-auth
+pymongo
+pandas
+bcrypt
+secrets
+Flask
+Werkzeug

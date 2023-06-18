@@ -1,0 +1,102 @@
+[{
+  "_id": {
+    "$oid": "648452d80f4640f226b5293c"
+  },
+  "title": "muhammad syafrudin prof./ WebProgramming final project",
+  "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam tortor tortor, congue eu ex a, aliquam imperdiet ligula. Donec ut turpis quis dui imperdiet condimentum eget nec libero. Interdum et malesuada fames ac ante ipsum primis in faucibus. Aenean pulvinar eu augue id bibendum. Donec porttitor aliquet semper. Donec suscipit, risus at gravida pretium, neque urna vehicula sapien, in porta orci mi quis orci. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Fusce sit amet est quam. Cras eros ex, ullamcorper in nunc accumsan, pellentesque viverra orci. Integer mattis porta urna, in venenatis dolor euismod eu. Phasellus risus eros, imperdiet vel magna in, tempor vulputate ipsum. Vestibulum ullamcorper lacus fermentum, dignissim dui vel, consequat risus. In a vulputate tortor.\r\n\r\nSuspendisse molestie felis lacinia, lobortis augue a, luctus ipsum. Pellentesque tempus nec mi in ullamcorper. Nam eget enim nec odio pretium placerat id eget eros. Morbi vehicula, diam quis dapibus vestibulum, augue enim eleifend elit, a dignissim lacus nisl et justo. Aliquam finibus ipsum massa, vitae vehicula lacus fringilla commodo. Praesent vulputate lectus orci, at gravida lorem imperdiet quis. Phasellus mi ipsum, tempus nec risus eu, egestas molestie nisi.\r\n\r\nQuisque eu metus tempus, placerat lectus vel, porta purus. Nulla sit amet ex arcu. Pellentesque porta enim non urna convallis, vitae accumsan ante iaculis. Suspendisse et commodo enim. Etiam ullamcorper ipsum non dapibus placerat. Suspendisse sed posuere nibh. Vivamus eget libero pellentesque nisi laoreet pharetra. Nulla molestie elementum neque quis iaculis. Mauris quis venenatis quam.",
+  "required_positions": [
+    "FRONTEND",
+    "BACKEND"
+  ],
+  "create_date": "2023-06-10, 19:39:20",
+  "leader": "test4",
+  "leader_id": "648452180f4640f226b5293b",
+  "applicants": [
+    {
+      "$oid": "64858e8d5a33995e0ee90a0c"
+    },
+    {
+      "$oid": "648590505a33995e0ee90a10"
+    }
+  ],
+  "view_count": 37,
+  "members": [
+    "648452180f4640f226b5293b",
+    "64858e8d5a33995e0ee90a0c",
+    "648590505a33995e0ee90a10"
+  ]
+},{
+  "_id": {
+    "$oid": "648453f20f4640f226b5293f"
+  },
+  "title": "song prof./ capstone project",
+  "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam tortor tortor, congue eu ex a, aliquam imperdiet ligula. Donec ut turpis quis dui imperdiet condimentum eget nec libero. Interdum et malesuada fames ac ante ipsum primis in faucibus. Aenean pulvinar eu augue id bibendum. Donec porttitor aliquet semper. Donec suscipit, risus at gravida pretium, neque urna vehicula sapien, in porta orci mi quis orci. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Fusce sit amet est quam. Cras eros ex, ullamcorper in nunc accumsan, pellentesque viverra orci. Integer mattis porta urna, in venenatis dolor euismod eu. Phasellus risus eros, imperdiet vel magna in, tempor vulputate ipsum. Vestibulum ullamcorper lacus fermentum, dignissim dui vel, consequat risus. In a vulputate tortor.\r\n\r\nSuspendisse molestie felis lacinia, lobortis augue a, luctus ipsum. Pellentesque tempus nec mi in ullamcorper. Nam eget enim nec odio pretium placerat id eget eros. Morbi vehicula, diam quis dapibus vestibulum, augue enim eleifend elit, a dignissim lacus nisl et justo. Aliquam finibus ipsum massa, vitae vehicula lacus fringilla commodo. Praesent vulputate lectus orci, at gravida lorem imperdiet quis. Phasellus mi ipsum, tempus nec risus eu, egestas molestie nisi.\r\n\r\nQuisque eu metus tempus, placerat lectus vel, porta purus. Nulla sit amet ex arcu. Pellentesque porta enim non urna convallis, vitae accumsan ante iaculis. Suspendisse et commodo enim. Etiam ullamcorper ipsum non dapibus placerat. Suspendisse sed posuere nibh. Vivamus eget libero pellentesque nisi laoreet pharetra. Nulla molestie elementum neque quis iaculis. Mauris quis venenatis quam.",
+  "required_positions": [
+    "FRONTEND",
+    "BACKEND",
+    "SECURITY"
+  ],
+  "create_date": "2023-06-10, 19:44:02",
+  "leader": "test5",
+  "leader_id": "648453b90f4640f226b5293e",
+  "applicants": [],
+  "view_count": 18,
+  "members": [
+    "648453b90f4640f226b5293e"
+  ]
+},{
+  "_id": {
+    "$oid": "648454780f4640f226b52943"
+  },
+  "title": "test6",
+  "content": "test6",
+  "required_positions": [
+    "BACKEND",
+    "SECURITY"
+  ],
+  "create_date": "2023-06-10, 19:46:16",
+  "leader": "test6",
+  "leader_id": "6484545e0f4640f226b52942",
+  "applicants": [],
+  "view_count": 12,
+  "members": [
+    "6484545e0f4640f226b52942"
+  ],
+  "comment_count": 1,
+  "modify_date": "2023-06-10, 19:54:16"
+},{
+  "_id": {
+    "$oid": "6484560e0f4640f226b52947"
+  },
+  "title": "muhammad prof./ machine learning 3rd assignment",
+  "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam tortor tortor, congue eu ex a, aliquam imperdiet ligula. Donec ut turpis quis dui imperdiet condimentum eget nec libero. Interdum et malesuada fames ac ante ipsum primis in faucibus. Aenean pulvinar eu augue id bibendum. Donec porttitor aliquet semper. Donec suscipit, risus at gravida pretium, neque urna vehicula sapien, in porta orci mi quis orci. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Fusce sit amet est quam. Cras eros ex, ullamcorper in nunc accumsan, pellentesque viverra orci. Integer mattis porta urna, in venenatis dolor euismod eu. Phasellus risus eros, imperdiet vel magna in, tempor vulputate ipsum. Vestibulum ullamcorper lacus fermentum, dignissim dui vel, consequat risus. In a vulputate tortor.\r\n\r\nSuspendisse molestie felis lacinia, lobortis augue a, luctus ipsum. Pellentesque tempus nec mi in ullamcorper. Nam eget enim nec odio pretium placerat id eget eros. Morbi vehicula, diam quis dapibus vestibulum, augue enim eleifend elit, a dignissim lacus nisl et justo. Aliquam finibus ipsum massa, vitae vehicula lacus fringilla commodo. Praesent vulputate lectus orci, at gravida lorem imperdiet quis. Phasellus mi ipsum, tempus nec risus eu, egestas molestie nisi.",
+  "required_positions": [
+    "AI",
+    "FRONTEND"
+  ],
+  "create_date": "2023-06-10, 19:53:02",
+  "leader": "test7",
+  "leader_id": "648455a50f4640f226b52946",
+  "applicants": [],
+  "view_count": 18,
+  "members": [
+    "648455a50f4640f226b52946"
+  ]
+},{
+  "_id": {
+    "$oid": "64858d365a33995e0ee90a08"
+  },
+  "title": "muhammad",
+  "content": "muhammad",
+  "required_positions": [
+    "AI"
+  ],
+  "create_date": "2023-06-11, 18:00:38",
+  "leader": "0000000000000",
+  "leader_id": "64858cfa5a33995e0ee90a07",
+  "applicants": [],
+  "view_count": 4,
+  "members": [
+    "64858cfa5a33995e0ee90a07"
+  ]
+}]

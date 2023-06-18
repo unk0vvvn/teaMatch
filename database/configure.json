@@ -1,0 +1,12 @@
+[{
+  "_id": {
+    "$oid": "648447253799067ed122116b"
+  },
+  "name": "포지션",
+  "positions": [
+    "AI",
+    "FRONTEND",
+    "BACKEND",
+    "SECURITY"
+  ]
+}]
