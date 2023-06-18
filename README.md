@@ -16,14 +16,12 @@ As a solution, I have developed a service to facilitate the gathering of team me
 <br/>
 
 ## Main Page
----
 <p align="center">
   <img src="https://github.com/unk0vvvn/teaMatch/assets/122202518/90722616-4de1-49a0-bd7c-555592b9d51d">
 </p>
 <br/>
 
 ## Recruit Page
----
 <p align="center">
   <img src="https://github.com/unk0vvvn/teaMatch/assets/122202518/a3e6084b-47cb-4084-9ee1-d5aedc9eb13b">
 </p>
@@ -35,14 +33,12 @@ As a solution, I have developed a service to facilitate the gathering of team me
 
 
 ## Chat with members
----
 <p align="center">
   <img src="https://github.com/unk0vvvn/teaMatch/assets/122202518/bd19d323-e912-4b59-97a4-d89d2e23056e">
 </p>
 <br/>
 
 ## Profile Page
----
 <p align="center">
   <img src="https://github.com/unk0vvvn/teaMatch/assets/122202518/949e055f-ac36-4a4d-94ea-12f9c2264d7f">
 </p>
@@ -78,7 +74,6 @@ As a solution, I have developed a service to facilitate the gathering of team me
 
 ## Flask Application Structure 
 
----
 ```
 .
 |──────app.py
