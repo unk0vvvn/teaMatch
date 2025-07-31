@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion MD Search Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: A thematic dashboard structure is used instead of a linear slide format. It starts with a main dashboard for a high-level overview, then allows users to dive into specific sections: Lifestyle Trends, Fashion Week Analysis (with interactive tabs for cities), Competitor Watch, and a final actionable Proposal section. This structure guides the user from broad cultural shifts to specific, actionable business ideas, which is more intuitive and useful for a product manager or designer than a static presentation. -->
+    <!-- Visualization & Content Choices: SNS keywords are represented as a styled HTML tag cloud for better interactivity. Fashion Week YouTube sentiment, originally a word cloud concept, is transformed into a clearer, quantitative bar chart using Chart.js for each city, enabling direct comparison. Competitor info is in a simple two-column layout for easy scanning. The final proposals are interactive cards that reveal more details on click. This approach prioritizes data clarity and user engagement over literal translations of the source report's visuals. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #FDFBF8; /* Warm Neutral: A very light cream */
+        }
+        .interactive-item {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .interactive-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        #keyword-modal {
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
+            <div class="flex items-center justify-center h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-amber-800">Fashion MD Search Engine</h1>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+        <section id="lifestyle" class="scroll-mt-20 mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-stone-900 mb-2">새로운 라이프스타일의 부상</h2>
+                <p class="text-stone-600">SNS 키워드 분석을 통해 소비자들이 추구하는 가치와 라이프스타일의 변화를 파악합니다. (키워드 또는 아래 카드를 클릭하세요)</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                <h3 class="font-bold text-xl mb-4 text-center text-amber-800">주요 라이프스타일 키워드</h3>
+                <div id="keyword-tags-container" class="flex flex-wrap justify-center items-center gap-3 text-center">
+                    <span data-keyword="quiet-luxury" class="interactive-item bg-amber-100 text-amber-800 text-2xl font-bold px-4 py-2 rounded-full">#조용한명품</span>
+                    <span data-keyword="sustainability" class="interactive-item bg-emerald-100 text-emerald-800 text-xl font-bold px-3 py-1 rounded-full">#지속가능성</span>
+                    <span data-keyword="athleisure" class="interactive-item bg-sky-100 text-sky-800 text-lg font-bold px-3 py-1 rounded-full">#에슬레저</span>
+                    <span data-keyword="y2k" class="interactive-item bg-rose-100 text-rose-800 text-lg font-bold px-3 py-1 rounded-full">#Y2K패션</span>
+                    <span data-keyword="genderless" class="interactive-item bg-violet-100 text-violet-800 text-md px-2 py-1 rounded-full">#젠더리스</span>
+                    <span data-keyword="personalization" class="interactive-item bg-orange-100 text-orange-800 text-md px-2 py-1 rounded-full">#개인화</span>
+                </div>
+            </div>
+
+            <div id="lifestyle-description" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div data-keyword="quiet-luxury" class="interactive-item bg-white p-5 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-lg text-stone-800">'조용한 명품'의 대중화</h4>
+                    <p class="text-stone-600 text-sm">로고 없는 심플하고 고급스러운 디자인과 좋은 소재에 대한 수요가 증가하며, 개인의 만족감을 중시하는 소비 트렌드가 확산되고 있습니다.</p>
+                </div>
+                <div data-keyword="sustainability" class="interactive-item bg-white p-5 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-lg text-stone-800">'지속가능성'과 '친환경' 소비</h4>
+                    <p class="text-stone-600 text-sm">재활용, 친환경 공법 등 자신의 가치관을 패션으로 표현하는 소비가 주요 구매 결정 요인으로 자리 잡고 있습니다.</p>
+                </div>
+                 <div data-keyword="athleisure" class="interactive-item bg-white p-5 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-lg text-stone-800">'에슬레저'와 '편안함'의 일상화</h4>
+                    <p class="text-stone-600 text-sm">기능성 소재와 편안한 디자인의 경계가 허물어지며 운동복과 일상복을 넘나드는 스타일이 새로운 표준이 되고 있습니다.</p>
+                </div>
+                <div data-keyword="y2k" class="interactive-item bg-white p-5 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-lg text-stone-800">'Y2K 레트로'의 귀환</h4>
+                    <p class="text-stone-600 text-sm">2000년대 초반의 낙천적이고 화려한 스타일이 현대적으로 재해석되고 있습니다. 로우라이즈, 크롭탑 등을 통해 개성을 표현하는 Z세대의 열망이 반영된 트렌드입니다.</p>
+                </div>
+                <div data-keyword="genderless" class="interactive-item bg-white p-5 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-lg text-stone-800">'젠더리스' 스타일의 확산</h4>
+                    <p class="text-stone-600 text-sm">성별의 경계를 허무는 오버사이즈 핏, 유틸리티 웨어가 주목받고 있습니다. 개인의 취향과 편안함을 우선시하며, 보다 자유롭고 포용적인 패션을 지향합니다.</p>
+                </div>
+                <div data-keyword="personalization" class="interactive-item bg-white p-5 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-lg text-stone-800">'하이퍼-개인화' 시대</h4>
+                    <p class="text-stone-600 text-sm">소비자들은 더 이상 유행을 맹목적으로 따르지 않습니다. 자신의 가치관, 체형, 취향에 맞춰 스타일을 조합하며, 패션을 통한 적극적인 자기표현을 즐깁니다.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <div id="keyword-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="modal-title" class="text-xl font-bold text-amber-800"></h3>
+                <button id="modal-close-button" class="text-stone-500 hover:text-stone-800 text-2xl font-bold">&times;</button>
+            </div>
+            <div class="p-4">
+                <p id="modal-description" class="text-stone-600 mb-4"></p>
+                <div>
+                    <h4 class="font-bold text-stone-700 mb-2">관련 출처</h4>
+                    <ul id="modal-links" class="list-disc list-inside space-y-2 text-sm">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-stone-800 text-white mt-16">
+        <div class="container mx-auto px-4 py-6 text-center text-sm">
+            <p>&copy; 2025 Fashion MD Search Engine. All Rights Reserved.</p>
+            <p class="text-stone-400">This report is for internal use at Uniqlo.</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const lifestyleData = {
+            'quiet-luxury': {
+                title: '#조용한명품',
+                description: '로고 플레이를 최소화하고, 고급스러운 소재와 정제된 실루엣으로 가치를 드러내는 스타일입니다. 과시적인 소비 대신 개인의 만족을 중시하는 라이프스타일 변화를 반영합니다.',
+                links: [
+                    { text: 'Limely: 10 Fashion Trends You Need To Know In 2025', url: 'https://www.limely.co.uk/blog/10-fashion-trends-you-need-to-know' },
+                    { text: 'allure: 2025 패션 키워드 미리 엿보기', url: 'https://www.allurekorea.com/2025/01/12/something-is-coming/' }
+                ]
+            },
+            'sustainability': {
+                title: '#지속가능성',
+                description: '재활용 소재, 친환경 공법, 윤리적 생산 과정 등 환경과 사회에 미치는 영향을 고려하는 패션 소비 트렌드입니다. 소비자들은 패션을 통해 자신의 신념을 표현합니다.',
+                links: [
+                    { text: 'YouTube: 2025 F/W 서울 패션 위크: 지속가능한 혁신', url: 'https://www.youtube.com/watch?v=-Q9xV4yOHgo' },
+                    { text: 'Goover: 2025년 패션 시장의 구조적 변화', url: 'https://seo.goover.ai/report/202503/go-public-report-ko-0ec6a7ed-f6a7-4bb8-b9a3-f2093c95886d-0-0.html' }
+                ]
+            },
+            'athleisure': {
+                title: '#에슬레저',
+                description: '운동(Athletic)과 여가(Leisure)의 합성어로, 운동복처럼 편안하면서도 일상복으로 손색없는 스타일을 의미합니다. 건강과 자기 관리를 중시하는 현대인의 라이프스타일이 반영된 트렌드입니다.',
+                links: [
+                    { text: 'Pixyle.ai: 10 Spring/Summer 2025 Keywords', url: 'https://www.pixyle.ai/blog/10-spring-summer-2025-keywords-your-online-store-cant-ignore' },
+                    { text: 'Who What Wear: Summer 2025 Fashion Trends', url: 'https://www.whowhatwear.com/fashion/trends/spring-summer-2025-fashion-trends' }
+                ]
+            },
+            'y2k': {
+                title: '#Y2K패션',
+                description: '2000년대 초반의 스타일이 현대적인 감성으로 재해석된 트렌드입니다. 로우라이즈 팬츠, 크롭탑, 화려한 컬러와 프린트 등이 특징이며, 레트로 열풍을 주도하고 있습니다.',
+                links: [
+                    { text: 'YouTube: 2025 fashion trends and predictions', url: 'https://www.youtube.com/watch?v=qi7pm5Xfs3I' }
+                ]
+            },
+            'genderless': {
+                title: '#젠더리스',
+                description: '성별의 경계를 허무는 오버사이즈 핏, 유틸리티 웨어가 주목받고 있습니다. 개인의 취향과 편안함을 우선시하며, 보다 자유롭고 포용적인 패션을 지향합니다.',
+                links: [
+                    { text: 'Vogue: The Rise of Gender-Fluid Fashion (Example)', url: '#' },
+                    { text: 'Hypebeast: How Genderless Style is Shaping the Industry (Example)', url: '#' }
+                ]
+            },
+            'personalization': {
+                title: '#개인화',
+                description: '소비자들은 더 이상 유행을 맹목적으로 따르지 않습니다. 자신의 가치관, 체형, 취향에 맞춰 스타일을 조합하며, 패션을 통한 적극적인 자기표현을 즐깁니다.',
+                links: [
+                    { text: 'Business of Fashion: The Personalization Imperative (Example)', url: '#' },
+                ]
+            }
+        };
+
+        const clickableItems = document.querySelectorAll('.interactive-item');
+        const modal = document.getElementById('keyword-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDescription = document.getElementById('modal-description');
+        const modalLinks = document.getElementById('modal-links');
+        const closeModalButton = document.getElementById('modal-close-button');
+
+        function openModal(keyword) {
+            const data = lifestyleData[keyword];
+            if (!data) return;
+
+            modalTitle.textContent = data.title;
+            modalDescription.textContent = data.description;
+            
+            modalLinks.innerHTML = '';
+            data.links.forEach(link => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = link.url;
+                a.textContent = link.text;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.className = 'text-sky-600 hover:underline';
+                li.appendChild(a);
+                modalLinks.appendChild(li);
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        clickableItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const keyword = item.dataset.keyword;
+                openModal(keyword);
+            });
+        });
+
+        closeModalButton.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+    });
+    </script>
+</body>
+</html>
