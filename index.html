@@ -57,15 +57,15 @@
             align-items: center;
             gap: 2rem;
         }
-        
+
         #cluster-filter {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
+
         label { font-weight: 500; }
-        
+
         select {
             background: rgba(255,255,255,0.2);
             color: white;
@@ -75,20 +75,20 @@
             font-size: 0.9rem;
         }
         select option { background: #764ba2; }
-        
+
         #last-updated { font-size: 0.9rem; opacity: 0.8; text-align: right; }
-        
+
         /* Main Content */
         main { padding: 2rem 0; }
-        
+
         .main-title {
             text-align: center;
             font-size: 2.5rem;
             margin-bottom: 1rem; /* Reduced margin */
             text-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
-        
 
+        /* Interpretation Section */
         .interpretation-section {
             background: rgba(0,0,0,0.15);
             backdrop-filter: blur(8px);
@@ -117,7 +117,7 @@
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 1.5rem;
         }
-        
+
         .chart-card {
             background: rgba(255,255,255,0.1);
             padding: 1.5rem;
@@ -139,7 +139,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .cluster-badge {
             font-size: 0.8rem;
             padding: 3px 8px;
@@ -149,7 +149,7 @@
         .cluster-1 { background-color: #ee5a24; }
         .cluster-2 { background-color: #00d2d3; }
         .cluster-3 { background-color: #54a0ff; }
-        
+
         .chart-container {
             position: relative;
             height: 150px; /* Adjusted height */
@@ -198,9 +198,9 @@
             <h1 class="main-title">실시간 호텔별 예측 수익 현황 (향후 15일)</h1>
 
             <div class="interpretation-section">
-                <p><strong class="cluster-1-text">[Cluster 1]</strong> 최근 평일 강세 패턴이 예측에 중요하게 반영되어, 향후 2주간 주중 상승 후 주말 조정 패턴이 반복될 것으로 예상됩니다.</p>
-                <p><strong class="cluster-2-text">[Cluster 2]</strong> 과거 7일 주기의 안정적 패턴이 높은 Attention Score를 받아, 향후 2주간 유사한 주간 변동성을 유지하며 완만한 상승세를 보일 것입니다.</p>
-                <p><strong class="cluster-3-text">[Cluster 3]</strong> 지난주 급등 패턴과 계절적 요인이 복합적으로 중요하게 작용하여, 향후 2주간 변동성은 크지만 주 단위 상승/하락 사이클이 뚜렷할 전망입니다.</p>
+                <p id="interp-cluster-1"><strong class="cluster-1-text">[Cluster 1]</strong> 해석 로딩 중...</p>
+                <p id="interp-cluster-2"><strong class="cluster-2-text">[Cluster 2]</strong> 해석 로딩 중...</p>
+                <p id="interp-cluster-3"><strong class="cluster-3-text">[Cluster 3]</strong> 해석 로딩 중...</p>
             </div>
 
             <div id="chart-grid" class="chart-grid">
@@ -212,11 +212,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             let hotels = [ // Use let to allow sorting
-                { id: 'HFL01', cluster: 1 }, { id: 'HGA01', cluster: 2 }, { id: 'HLX01', cluster: 2 },
-                { id: 'HNY01', cluster: 1 }, { id: 'HST01', cluster: 3 }, { id: 'RHK01', cluster: 2 },
-                { id: 'RHK12', cluster: 3 }, { id: 'RJR01', cluster: 3 }, { id: 'RKT01', cluster: 2 },
-                { id: 'RKT02', cluster: 1 }, { id: 'RKT03', cluster: 1 }, { id: 'RKT04', cluster: 1 },
-                { id: 'RKT05', cluster: 2 }, { id: 'RKT07', cluster: 2 }, { id: 'RKT08', cluster: 3 }
+                { id: 'HFL01', cluster: 1, baseLevel: 60 }, { id: 'HGA01', cluster: 2, baseLevel: 50 }, { id: 'HLX01', cluster: 2, baseLevel: 55 },
+                { id: 'HNY01', cluster: 1, baseLevel: 65 }, { id: 'HST01', cluster: 3, baseLevel: 70 }, { id: 'RHK01', cluster: 2, baseLevel: 45 },
+                { id: 'RHK12', cluster: 3, baseLevel: 80 }, { id: 'RJR01', cluster: 3, baseLevel: 75 }, { id: 'RKT01', cluster: 2, baseLevel: 48 },
+                { id: 'RKT02', cluster: 1, baseLevel: 62 }, { id: 'RKT03', cluster: 1, baseLevel: 58 }, { id: 'RKT04', cluster: 1, baseLevel: 63 },
+                { id: 'RKT05', cluster: 2, baseLevel: 52 }, { id: 'RKT07', cluster: 2, baseLevel: 49 }, { id: 'RKT08', cluster: 3, baseLevel: 72 }
             ];
 
             // Sort hotels by cluster number
@@ -225,13 +225,15 @@
             const chartGrid = document.getElementById('chart-grid');
             const lastUpdatedEl = document.getElementById('last-updated');
             const clusterSelect = document.getElementById('cluster-select');
+            const interpCluster1 = document.getElementById('interp-cluster-1');
+            const interpCluster2 = document.getElementById('interp-cluster-2');
+            const interpCluster3 = document.getElementById('interp-cluster-3');
+
 
             let charts = {};
-            let hotelData = {}; // Stores { labels: [], quantiles: { q2:[], q10:[], ..., q98:[] }, smape: 0 }
-            const FORECAST_DAYS = 15; // Number of days to forecast
-            
-            // Map dataset index to quantile percentage and label
-            // Sort order: [4, 5, 6, 3, 2, 1, 0] corresponding to [2, 10, 25, 50, 75, 90, 98]
+            let hotelData = {};
+            const FORECAST_DAYS = 15;
+
              const quantileMap = [
                 { index: 4, percent: 2, label: '2%' },
                 { index: 5, percent: 10, label: '10%' },
@@ -241,35 +243,31 @@
                 { index: 1, percent: 90, label: '90%' },
                 { index: 0, percent: 98, label: '98%' },
             ];
-             // Ensure this map reflects the actual order in datasets array
-             // Datasets order: 98, 90, 75, 50, 2, 10, 25
 
             const QUANTILES_NUM = [0.02, 0.10, 0.25, 0.50, 0.75, 0.90, 0.98];
 
-
-            // Define colors for quantile bands (distinct colors)
             const quantileColors = {
-                 q50: 'rgba(68, 84, 182, 1)',    // Main prediction line (Strong Blue)
-                 q25_75: 'rgba(104, 109, 224, 0.5)', // IQR band (Lighter Blue)
-                 q10_90: 'rgba(68, 182, 137, 0.35)',// 80% band (Greenish)
-                 q2_98: 'rgba(158, 158, 158, 0.25)' // 96% band (Grayish)
+                 q50: 'rgba(68, 84, 182, 1)',
+                 q25_75: 'rgba(104, 109, 224, 0.5)',
+                 q10_90: 'rgba(68, 182, 137, 0.35)',
+                 q2_98: 'rgba(158, 158, 158, 0.25)'
             };
 
+            // Global variable to track the current simulation start date
+            let currentSimulatedDate = new Date();
 
             // 1. Initialize charts and data structures
             function initialize() {
-                // Clear existing charts before initialization if any
-                chartGrid.innerHTML = ''; 
-                charts = {}; 
+                chartGrid.innerHTML = '';
+                charts = {};
                 hotelData = {};
 
-                // Iterate through the SORTED hotels array
                 hotels.forEach(hotel => {
                     const card = document.createElement('div');
                     card.className = 'chart-card';
                     card.dataset.hotelId = hotel.id;
                     card.dataset.cluster = hotel.cluster;
-                    
+
                     card.innerHTML = `
                         <div class="chart-title">
                             <span>${hotel.id}</span>
@@ -284,57 +282,22 @@
                     `;
                     chartGrid.appendChild(card);
 
-                    hotelData[hotel.id] = generateInitialQuantileData(hotel.id);
+                    // Generate initial data for the first time using the global start date
+                    hotelData[hotel.id] = generateForecastData(hotel.id, currentSimulatedDate);
 
                     const ctx = document.getElementById(`chart-${hotel.id}`).getContext('2d');
                     charts[hotel.id] = new Chart(ctx, {
                         type: 'line',
                         data: {
-                            labels: hotelData[hotel.id].labels,
+                            labels: hotelData[hotel.id].labels, // Initial labels
                             datasets: [
-                                // Quantile bands (filled areas) - drawn first, widest to narrowest
-                                { // 2%-98% band (index 0) - Target index 4 (q2)
-                                    label: '2%-98% CI',
-                                    data: hotelData[hotel.id].quantiles.q98, // Upper bound
-                                    borderColor: 'transparent',
-                                    backgroundColor: quantileColors.q2_98,
-                                    pointRadius: 0,
-                                    fill: 4, // Fill down to the dataset at index 4 (q2 data)
-                                    order: 4 // Draw behind other bands
-                                },
-                                 { // 10%-90% band (index 1) - Target index 5 (q10)
-                                    label: '10%-90% CI',
-                                    data: hotelData[hotel.id].quantiles.q90, // Upper bound
-                                    borderColor: 'transparent',
-                                    backgroundColor: quantileColors.q10_90,
-                                    pointRadius: 0,
-                                    fill: 5, // Fill down to the dataset at index 5 (q10 data)
-                                    order: 3
-                                },
-                                { // 25%-75% band (index 2) - Target index 6 (q25)
-                                    label: '25%-75% CI',
-                                    data: hotelData[hotel.id].quantiles.q75, // Upper bound
-                                    borderColor: 'transparent',
-                                    backgroundColor: quantileColors.q25_75,
-                                    pointRadius: 0,
-                                    fill: 6, // Fill down to the dataset at index 6 (q25 data)
-                                    order: 2
-                                },
-                                // Median line (index 3)
-                                {
-                                    label: '50% (Median)', // Changed label for tooltip
-                                    data: hotelData[hotel.id].quantiles.q50,
-                                    borderColor: quantileColors.q50,
-                                    borderWidth: 3, // Emphasized line width
-                                    fill: false,
-                                    tension: 0.4,
-                                    pointRadius: 0,
-                                    order: 1 // Draw on top of bands
-                                },
-                                // Lower bounds (needed for filling) - hidden lines, drawn last
-                                 { label: '2%', data: hotelData[hotel.id].quantiles.q2, fill: false, pointRadius: 0, borderColor: 'transparent', order: 5 }, // index 4
-                                 { label: '10%', data: hotelData[hotel.id].quantiles.q10, fill: false, pointRadius: 0, borderColor: 'transparent', order: 5 },// index 5
-                                 { label: '25%', data: hotelData[hotel.id].quantiles.q25, fill: false, pointRadius: 0, borderColor: 'transparent', order: 5 }, // index 6
+                                { label: '2%-98% CI', data: hotelData[hotel.id].quantiles.q98, borderColor: 'transparent', backgroundColor: quantileColors.q2_98, pointRadius: 0, fill: 4, order: 4 },
+                                { label: '10%-90% CI', data: hotelData[hotel.id].quantiles.q90, borderColor: 'transparent', backgroundColor: quantileColors.q10_90, pointRadius: 0, fill: 5, order: 3 },
+                                { label: '25%-75% CI', data: hotelData[hotel.id].quantiles.q75, borderColor: 'transparent', backgroundColor: quantileColors.q25_75, pointRadius: 0, fill: 6, order: 2 },
+                                { label: '50% (Median)', data: hotelData[hotel.id].quantiles.q50, borderColor: quantileColors.q50, borderWidth: 3, fill: false, tension: 0.4, pointRadius: 0, order: 1 },
+                                { label: '2%', data: hotelData[hotel.id].quantiles.q2, fill: false, pointRadius: 0, borderColor: 'transparent', order: 5 }, // index 4
+                                { label: '10%', data: hotelData[hotel.id].quantiles.q10, fill: false, pointRadius: 0, borderColor: 'transparent', order: 5 },// index 5
+                                { label: '25%', data: hotelData[hotel.id].quantiles.q25, fill: false, pointRadius: 0, borderColor: 'transparent', order: 5 }, // index 6
                             ]
                         },
                         options: {
@@ -343,95 +306,99 @@
                             scales: {
                                 x: {
                                     type: 'time',
-                                    time: { 
-                                        unit: 'day', 
-                                        displayFormats: { day: 'MM-dd' } 
-                                    },
+                                    time: { unit: 'day', displayFormats: { day: 'MM-dd' } },
                                     ticks: { color: 'rgba(255,255,255,0.7)', maxTicksLimit: 7 },
                                     grid: { color: 'rgba(255,255,255,0.1)' }
                                 },
                                 y: {
-                                    beginAtZero: true, 
+                                    beginAtZero: true,
                                     ticks: { color: 'rgba(255,255,255,0.7)' },
                                     grid: { color: 'rgba(255,255,255,0.1)' },
-                                    stacked: false // Important: Do not stack quantile bands
+                                    stacked: false
                                 }
                             },
-                            plugins: { 
+                            plugins: {
                                 legend: { display: false },
                                 tooltip: {
-                                     mode: 'index', // Show tooltip for all datasets at that index
+                                     mode: 'index',
                                      intersect: false,
-                                     itemSort: function(a, b) { // Sort tooltip items by dataset order (which we map to quantiles)
-                                        // Find the corresponding quantile percentage for sorting
+                                     itemSort: function(a, b) {
                                         const getPercent = (index) => {
                                             const mapEntry = quantileMap.find(item => item.index === index);
-                                            return mapEntry ? mapEntry.percent : 1000; // Place unknowns last
+                                            return mapEntry ? mapEntry.percent : 1000;
                                         };
                                         return getPercent(a.datasetIndex) - getPercent(b.datasetIndex);
                                      },
                                      callbacks: {
-                                        // Filter out hidden datasets (lower bounds unless they are part of the visible set)
-                                        // Only show upper bounds of filled areas + median + lower bounds explicitly listed
                                         filter: function(tooltipItem) {
-                                            // Show index 0, 1, 2 (upper bounds), 3 (median), 4, 5, 6 (lower bounds)
-                                            // The filter applies BEFORE sorting, so we use original indices
                                             return tooltipItem.datasetIndex >= 0 && tooltipItem.datasetIndex <= 6;
                                         },
                                         label: function(context) {
-                                            // Find the correct label and percent from the map based on the *original* datasetIndex
                                             const mapEntry = quantileMap.find(item => item.index === context.datasetIndex);
-                                            let quantileLabel = mapEntry ? mapEntry.label : context.dataset.label || ''; // Use map label if found
-                                            
-                                            let label = quantileLabel ? `${quantileLabel} 예측: ` : '값: '; 
-
+                                            let quantileLabel = mapEntry ? mapEntry.label : context.dataset.label || '';
+                                            let label = quantileLabel ? `${quantileLabel} 예측: ` : '값: ';
                                             if (context.parsed.y !== null) {
-                                                // Assuming values are in 10,000 KRW units
-                                                label += new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(context.parsed.y * 10000); 
+                                                label += new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(context.parsed.y * 10000);
                                             }
                                             return label;
                                         }
                                     }
                                 }
                              },
-                             interaction: { // Improve hover behavior
+                             interaction: {
                                 mode: 'nearest',
                                 axis: 'x',
                                 intersect: false
                             }
                         }
                     });
-
+                     // Set initial SMAPE display
+                     const smapeEl = document.getElementById(`smape-${hotel.id}`);
+                     if(smapeEl) {
+                        smapeEl.textContent = `${hotelData[hotel.id].smape}%`;
+                     }
                 });
-                updateAllCharts(); // Initial data load and display
+                updateInterpretations(); // Update interpretation text initially
+                updateLastUpdatedTime(); // Update time display initially
             }
 
-            // 2. Simulate quantile forecast data
-            function generateInitialQuantileData(hotelId) {
+             // 2. Simulate quantile forecast data generation for a specific start date
+            function generateForecastData(hotelId, startDate) {
                 const data = { labels: [], quantiles: {}, smape: 0 };
-                QUANTILES_NUM.forEach(q => { 
-                    const key = `q${Math.round(q*100)}`; 
+                QUANTILES_NUM.forEach(q => {
+                    const key = `q${Math.round(q*100)}`;
                     data.quantiles[key] = [];
                  });
-                
-                let currentDate = new Date(); 
-                let baseValue = 50 + hotelId.charCodeAt(2); 
+
+                const hotelInfo = hotels.find(h => h.id === hotelId);
+                const cluster = hotelInfo.cluster;
+                const baseLevel = hotelInfo.baseLevel; // Use cluster-specific base level
+
+                const epochStart = new Date(2025, 0, 1);
+                // Calculate days since epoch based on the START of the forecast period
+                const daysSinceEpoch = Math.floor((startDate - epochStart) / (1000 * 60 * 60 * 24));
+
+                // Initialize baseValue using the pattern at the day BEFORE the start date
+                let baseValue = simulateNextDayValue(hotelId, cluster, baseLevel, daysSinceEpoch - 1, baseLevel);
+
                 let actualValueBase = baseValue * (0.95 + Math.random() * 0.1);
                 let actualValues = [];
 
-
                 for (let i = 0; i < FORECAST_DAYS; i++) {
-                    let forecastDate = new Date(currentDate);
-                    forecastDate.setDate(currentDate.getDate() + i);
+                    let forecastDate = new Date(startDate);
+                    forecastDate.setDate(startDate.getDate() + i);
                     data.labels.push(forecastDate);
 
+                    // Calculate the 'effective' day index for consistent patterns
+                    const effectiveDayIndex = daysSinceEpoch + i;
+
                     // Simulate median (50%) value first incorporating 7-day pattern
-                    baseValue = simulateNextDayValue(hotelId, i, baseValue); 
+                    baseValue = simulateNextDayValue(hotelId, cluster, baseLevel, effectiveDayIndex, baseValue);
                     const median = Math.max(0, baseValue);
                     data.quantiles.q50.push(median);
 
                     // Simulate other quantiles based on the median and spread
-                    const spreadFactor = 0.05 + Math.random() * 0.1; 
+                    const spreadFactor = 0.04 + Math.random() * 0.08; // Slightly reduced spread
                     data.quantiles.q2.push(Math.max(0, median * (1 - spreadFactor * 2.5)));
                     data.quantiles.q10.push(Math.max(0, median * (1 - spreadFactor * 1.5)));
                     data.quantiles.q25.push(Math.max(0, median * (1 - spreadFactor * 0.8)));
@@ -440,38 +407,61 @@
                     data.quantiles.q98.push(Math.max(0, median * (1 + spreadFactor * 2.5)));
 
                     // Simulate actual value for SMAPE calculation (independent simulation)
-                     actualValueBase = simulateNextDayValue(hotelId, i, actualValueBase, 0.08); 
+                     actualValueBase = simulateNextDayValue(hotelId, cluster, baseLevel, effectiveDayIndex, actualValueBase, 0.06); // Slightly different noise
                      actualValues.push(Math.max(0, actualValueBase));
                 }
-                
+
                  // --- SMAPE Calculation & Assignment ---
-                let calculatedSmape = calculateSMAPE(actualValues, data.quantiles.q50); 
-                
-                let targetSMAPE = Math.random() < 0.85 ? Math.random() * 10 + 5 : Math.random() * 5 + 15; 
-                data.smape = parseFloat(targetSMAPE.toFixed(1)); 
+                let calculatedSmape = calculateSMAPE(actualValues, data.quantiles.q50);
+                let targetSMAPE = Math.random() < 0.9 ? Math.random() * 10 + 5 : Math.random() * 5 + 15; // 90% chance < 15%
+                data.smape = parseFloat(targetSMAPE.toFixed(1));
 
                 return data;
             }
 
-            // Simulate the median value for the next day with 7-day pattern
-            function simulateNextDayValue(hotelId, dayIndex, previousValue, noiseFactor = 0.03) { 
-                const clusterFactor = hotels.find(h=>h.id===hotelId).cluster * 1.5; 
-                const weeklyCycleAmplitude = 25 + clusterFactor * 2; 
-                const weeklyCycle = Math.cos((dayIndex + clusterFactor + 2) * 2 * Math.PI / 7) * weeklyCycleAmplitude; 
-                
-                const slightUpwardTrend = dayIndex * 0.1; 
-                const randomNoise = (Math.random() - 0.5) * previousValue * noiseFactor;
 
-                let nextValue = previousValue * (0.99 + Math.random() * 0.02) 
-                                + weeklyCycle 
-                                + slightUpwardTrend 
-                                + randomNoise 
-                                + clusterFactor; 
-                
-                nextValue = Math.max(previousValue * 0.85, nextValue); 
-                nextValue = Math.max(10, nextValue); 
+            // Simulate the median value for the next day with CLUSTER-SPECIFIC 7-day pattern and NO TREND
+            function simulateNextDayValue(hotelId, cluster, baseLevel, effectiveDayIndex, previousValue, noiseFactor = 0.02) { // Even lower default noise
+                let weeklyCycle = 0;
+                const weeklyCycleAmplitude = baseLevel * 0.3; // Amplitude relative to base level
 
-                return Math.max(0, nextValue); 
+                // Get day of the week (0=Sun, 6=Sat) based on effective index
+                // Assuming epochStart (Jan 1, 2025) is a Wednesday (day 3)
+                const dayOfWeek = (effectiveDayIndex + 3) % 7;
+
+                if (cluster === 1) { // Weekday peak, weekend low
+                    if (dayOfWeek >= 1 && dayOfWeek <= 4) { // Mon-Thu
+                       weeklyCycle = Math.cos((effectiveDayIndex + 2) * 2 * Math.PI / 7) * weeklyCycleAmplitude * 1.2;
+                    } else { // Fri-Sun
+                       weeklyCycle = Math.cos((effectiveDayIndex + 2) * 2 * Math.PI / 7) * weeklyCycleAmplitude * 0.8;
+                    }
+                } else if (cluster === 2) { // Stable with slight weekend bump
+                    weeklyCycle = Math.cos((effectiveDayIndex + 5) * 2 * Math.PI / 7) * weeklyCycleAmplitude * 0.5;
+                     if (dayOfWeek === 5 || dayOfWeek === 6) { // Fri-Sat slight boost
+                       weeklyCycle += baseLevel * 0.05;
+                     }
+                } else { // Cluster 3: Weekend peak, weekday low, higher volatility
+                    noiseFactor = 0.04;
+                     if (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) { // Fri-Sun
+                       weeklyCycle = Math.cos((effectiveDayIndex) * 2 * Math.PI / 7) * weeklyCycleAmplitude * 1.3;
+                    } else { // Mon-Thu
+                       weeklyCycle = Math.cos((effectiveDayIndex) * 2 * Math.PI / 7) * weeklyCycleAmplitude * 0.7;
+                    }
+                }
+
+                const randomNoise = (Math.random() - 0.5) * baseLevel * noiseFactor;
+
+                let nextValue = baseLevel + weeklyCycle + randomNoise;
+
+                 nextValue = nextValue * 0.95 + baseLevel * 0.05;
+
+
+                const maxVal = baseLevel + weeklyCycleAmplitude * 1.5;
+                const minVal = Math.max(10, baseLevel - weeklyCycleAmplitude * 1.5);
+                nextValue = Math.min(maxVal, Math.max(minVal, nextValue));
+
+
+                return Math.max(0, nextValue); // Ensure non-negative
             }
 
 
@@ -481,39 +471,83 @@
                  let sum = 0;
                  for (let i = 0; i < actual.length; i++) {
                      const num = Math.abs(predicted[i] - actual[i]);
-                     const den = (Math.abs(actual[i]) + Math.abs(predicted[i])) / 2 + 1e-9; 
-                     sum += num / den; 
+                     const den = (Math.abs(actual[i]) + Math.abs(predicted[i])) / 2 + 1e-9;
+                     sum += num / den;
                  }
-                 return parseFloat(((sum / actual.length) * 100).toFixed(1)); 
+                 return parseFloat(((sum / actual.length) * 100).toFixed(1));
+            }
+
+            // Function to update only the last updated time display
+            function updateLastUpdatedTime() {
+                 const now = new Date();
+                 const simulatedDateStr = currentSimulatedDate.toLocaleDateString('ko-KR');
+                 lastUpdatedEl.textContent = `예측 기준일: ${simulatedDateStr} (갱신: ${now.toLocaleTimeString()})`; // Show both
+            }
+
+            // --- NEW: Function to update interpretation text ---
+            function updateInterpretations() {
+                const dayOfWeek = currentSimulatedDate.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+                const weekOfMonth = Math.ceil(currentSimulatedDate.getDate() / 7);
+
+                // Cluster 1 Interpretation
+                let interp1 = `<strong class="cluster-1-text">[Cluster 1]</strong> `;
+                if (dayOfWeek >= 1 && dayOfWeek <= 4) { // Mon-Thu
+                    interp1 += `주중 강세 패턴이 지속되며 다음 주말까지 점진적 상승 후 조정을 보일 것으로 예측됩니다.`;
+                } else { // Fri-Sun
+                    interp1 += `주말 조정 국면으로, 다음 주 초반 반등 가능성에 주목해야 합니다.`;
+                }
+                 interpCluster1.innerHTML = interp1;
+
+
+                // Cluster 2 Interpretation
+                let interp2 = `<strong class="cluster-2-text">[Cluster 2]</strong> `;
+                 if (dayOfWeek === 5 || dayOfWeek === 6) { // Fri-Sat
+                    interp2 += `안정적인 패턴 속 주말 특수가 반영되어 소폭 상승세가 예상됩니다. 다음 주 초반 보합세를 보일 것입니다.`;
+                 } else {
+                     interp2 += `과거 7일 주기의 안정적 패턴을 유지하며, 다음 주말까지 큰 변동 없이 완만한 흐름을 이어갈 전망입니다.`;
+                 }
+                 interpCluster2.innerHTML = interp2;
+
+                // Cluster 3 Interpretation
+                 let interp3 = `<strong class="cluster-3-text">[Cluster 3]</strong> `;
+                 if (dayOfWeek === 0 || dayOfWeek === 6) { // Sun, Sat
+                     interp3 += `높은 변동성 속 주말 강세 패턴이 뚜렷합니다. 다음 주 중반까지 하락 조정 가능성이 있습니다.`;
+                 } else if (dayOfWeek >=1 && dayOfWeek <= 3) { // Mon-Wed
+                      interp3 += `주중 약세 조정 기간으로, 주 후반 반등을 준비하는 모습입니다.`;
+                 } else { // Thu, Fri
+                     interp3 += `주말 수요 증가 기대감이 반영되며 상승 전환 가능성이 높은 구간입니다.`;
+                 }
+                 interpCluster3.innerHTML = interp3;
             }
 
 
-            // 3. Update charts function (runs every 10 seconds)
+            // 3. Update charts function (runs every 5 seconds)
             function updateAllCharts() {
-                const now = new Date();
-                lastUpdatedEl.textContent = `마지막 업데이트: ${now.toLocaleTimeString()}`;
+                // Increment the simulated start date by one day
+                currentSimulatedDate.setDate(currentSimulatedDate.getDate() + 1);
+                updateLastUpdatedTime(); // Update time display
+                updateInterpretations(); // Update interpretation text
 
                 hotels.forEach(hotel => {
                     const chart = charts[hotel.id];
-                    // Regenerate data to reflect potential pattern changes over time (if needed)
-                    // For now, it just recalculates based on the same logic
-                    const newData = generateInitialQuantileData(hotel.id); 
-                    
-                    hotelData[hotel.id] = newData; 
+                    // Generate new forecast data starting from the UPDATED simulated date
+                    const newData = generateForecastData(hotel.id, currentSimulatedDate);
 
+                    hotelData[hotel.id] = newData;
+
+                    // Update chart labels AND data
                     chart.data.labels = newData.labels;
-                    // Update all datasets
-                    chart.data.datasets[0].data = newData.quantiles.q98; 
-                    chart.data.datasets[1].data = newData.quantiles.q90; 
-                    chart.data.datasets[2].data = newData.quantiles.q75; 
-                    chart.data.datasets[3].data = newData.quantiles.q50; 
-                    chart.data.datasets[4].data = newData.quantiles.q2;  
-                    chart.data.datasets[5].data = newData.quantiles.q10; 
-                    chart.data.datasets[6].data = newData.quantiles.q25; 
+                    chart.data.datasets[0].data = newData.quantiles.q98;
+                    chart.data.datasets[1].data = newData.quantiles.q90;
+                    chart.data.datasets[2].data = newData.quantiles.q75;
+                    chart.data.datasets[3].data = newData.quantiles.q50;
+                    chart.data.datasets[4].data = newData.quantiles.q2;
+                    chart.data.datasets[5].data = newData.quantiles.q10;
+                    chart.data.datasets[6].data = newData.quantiles.q25;
 
-                     chart.data.datasets[0].fill = 4; 
-                     chart.data.datasets[1].fill = 5; 
-                     chart.data.datasets[2].fill = 6; 
+                     chart.data.datasets[0].fill = 4;
+                     chart.data.datasets[1].fill = 5;
+                     chart.data.datasets[2].fill = 6;
 
 
                     // Update the displayed SMAPE value
@@ -521,17 +555,18 @@
                     if(smapeEl) {
                         smapeEl.textContent = `${newData.smape}%`;
                     }
-                    
-                    chart.update('none'); 
+
+                    // Update chart without animation, letting the time scale adjust
+                    chart.update('none');
                 });
             }
-            
+
             // 4. Event Handlers
             clusterSelect.addEventListener('change', (e) => {
                 const selectedCluster = e.target.value;
                 document.querySelectorAll('.chart-card').forEach(card => {
                     if (selectedCluster === 'all' || card.dataset.cluster === selectedCluster) {
-                        card.style.display = 'flex'; 
+                        card.style.display = 'flex';
                     } else {
                         card.style.display = 'none';
                     }
@@ -540,7 +575,7 @@
 
             // 5. Execution
             initialize();
-            setInterval(updateAllCharts, 10000); // Update every 10 seconds
+            setInterval(updateAllCharts, 5000); // Update every 5 seconds
         });
     </script>
 </body>
